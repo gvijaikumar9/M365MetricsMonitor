@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "M365MetricsMonitor": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:59242;http://localhost:59243"
+    }
+  }
+}

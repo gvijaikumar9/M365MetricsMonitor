@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>M365 Metrics Monitor</title>
+<style>
+  :root{
+    --bg:#eef1f8; --surface:#ffffff; --surface-2:#f7f9fc; --border:#e2e7f1;
+    --text:#182031; --muted:#5c6779; --faint:#8a94a6;
+    --accent:#3f51d6; --accent-soft:#eaecfb;
+    --good:#1a9d6a; --good-soft:#e3f5ec;
+    --warn:#c07d0a; --warn-soft:#fbf1dc;
+    --bad:#d33b3b; --bad-soft:#fbe4e4;
+    --track:#eef1f6;
+    --shadow:0 1px 2px rgba(20,30,60,.06),0 4px 16px rgba(20,30,60,.05);
+    --shadow-hi:0 2px 6px rgba(20,30,60,.10),0 12px 30px rgba(20,30,60,.10);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0e1320; --surface:#161c2b; --surface-2:#1c2434; --border:#28324a;
+      --text:#e7ebf4; --muted:#98a2b6; --faint:#6b768c;
+      --accent:#7684ff; --accent-soft:#212a52;
+      --good:#33c088; --good-soft:#123227;
+      --warn:#e0a53a; --warn-soft:#33290f;
+      --bad:#f06a6a; --bad-soft:#361a1c;
+      --track:#222b3d;
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
+      --shadow-hi:0 2px 8px rgba(0,0,0,.4),0 16px 36px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0e1320; --surface:#161c2b; --surface-2:#1c2434; --border:#28324a;
+    --text:#e7ebf4; --muted:#98a2b6; --faint:#6b768c;
+    --accent:#7684ff; --accent-soft:#212a52;
+    --good:#33c088; --good-soft:#123227;
+    --warn:#e0a53a; --warn-soft:#33290f;
+    --bad:#f06a6a; --bad-soft:#361a1c;
+    --track:#222b3d;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
+    --shadow-hi:0 2px 8px rgba(0,0,0,.4),0 16px 36px rgba(0,0,0,.35);
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:14px; line-height:1.45; -webkit-font-smoothing:antialiased}
+  .tnum{font-variant-numeric:tabular-nums}
+  .wrap{max-width:1240px; margin:0 auto; padding:20px 24px 48px}
+
+  header.top{display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:14px}
+  .brand{display:flex; align-items:center; gap:12px}
+  .logo{width:38px; height:38px; border-radius:10px; background:linear-gradient(135deg,var(--accent),#22b8c4);
+        display:grid; place-items:center; color:#fff; font-weight:800; font-size:15px}
+  .brand h1{margin:0; font-size:18px; font-weight:700; letter-spacing:-.2px}
+  .brand .sub{margin:0; color:var(--muted); font-size:12px}
+  .spacer{flex:1}
+  .chip{display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border:1px solid var(--border);
+        background:var(--surface); border-radius:999px; font-size:12px; color:var(--muted)}
+  .dot{width:8px; height:8px; border-radius:50%}
+  .btn{border:1px solid var(--border); background:var(--surface); color:var(--text); cursor:pointer;
+       padding:7px 12px; border-radius:9px; font-size:12px; font-weight:600}
+  .btn:hover{border-color:var(--accent); color:var(--accent)}
+  .badge-proto{background:var(--warn-soft); color:var(--warn); font-weight:700; padding:5px 10px; border-radius:999px; font-size:11px}
+
+  .legendbar{display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:16px; color:var(--muted); font-size:12px}
+  .legendbar .li{display:inline-flex; align-items:center; gap:6px}
+
+  .fresh{position:absolute; top:13px; right:13px; display:inline-flex; align-items:center; gap:4px;
+    font-size:10px; font-weight:800; letter-spacing:.4px; padding:3px 7px; border-radius:999px; z-index:2}
+  .fresh svg{width:11px; height:11px}
+  .fresh.live{background:var(--good-soft); color:var(--good)}
+  .fresh.delayed{background:var(--warn-soft); color:var(--warn)}
+  .fresh.static{position:static}
+
+  .health{display:flex; align-items:center; gap:14px; padding:14px 18px; border-radius:14px;
+    background:var(--surface); border:1px solid var(--border); box-shadow:var(--shadow); margin-bottom:18px; position:relative}
+  .health .ring{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;
+    background:var(--good-soft); color:var(--good); font-size:20px; flex:none}
+  .health .h-main{font-weight:700}
+  .health .h-sub{color:var(--muted); font-size:12.5px}
+  .health .pills{display:flex; gap:8px; flex-wrap:wrap}
+  .hpill{font-size:12px; padding:5px 10px; border-radius:999px; font-weight:600}
+  .hpill.warn{background:var(--warn-soft); color:var(--warn)}
+  .hpill.info{background:var(--accent-soft); color:var(--accent)}
+
+  .grid{display:grid; gap:14px; align-items:stretch}
+  .card.flip{display:grid}
+  .card.flip>.flip-inner{height:100%}
+  .card.flip .face{min-height:100%}
+  .kpis{grid-template-columns:repeat(4,1fr); margin-bottom:14px}
+  @media(max-width:920px){.kpis{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:520px){.kpis{grid-template-columns:1fr}}
+
+  /* flip card */
+  .card{background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    box-shadow:var(--shadow); position:relative; perspective:1500px}
+  .card.flip{cursor:pointer; transition:box-shadow .2s, border-color .2s}
+  .card.flip:hover{box-shadow:var(--shadow-hi); border-color:var(--accent)}
+  .card.flip:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+  .flip-inner{display:grid; transform-style:preserve-3d; transition:transform .55s cubic-bezier(.2,.7,.2,1)}
+  .card.flipped .flip-inner{transform:rotateY(180deg)}
+  .face{grid-area:1/1; position:relative; padding:16px; min-width:0;
+    -webkit-backface-visibility:hidden; backface-visibility:hidden}
+  .face.back{transform:rotateY(180deg)}
+
+  .hint{position:absolute; bottom:11px; right:12px; width:22px; height:22px; border-radius:50%;
+    display:grid; place-items:center; color:var(--faint); border:1px solid var(--border); background:var(--surface); z-index:2}
+  .hint svg{width:12px; height:12px}
+  .card.flip:hover .hint{color:var(--accent); border-color:var(--accent)}
+
+  .kpi::before{content:""; position:absolute; left:0; top:0; bottom:0; width:4px;
+    border-radius:14px 0 0 14px; background:var(--accent); z-index:1}
+  .kpi.good::before{background:var(--good)}
+  .kpi.warn::before{background:var(--warn)}
+  .kpi.bad::before{background:var(--bad)}
+  .kpi .label{color:var(--muted); font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.4px; padding-right:52px}
+  .kpi .value{font-size:30px; font-weight:750; margin:6px 0 2px; letter-spacing:-.5px}
+  .kpi .value small{font-size:15px; color:var(--muted); font-weight:600}
+  .kpi .note{font-size:12.5px; color:var(--muted)}
+  .state{display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:700; padding:3px 9px; border-radius:999px}
+  .state.good{background:var(--good-soft); color:var(--good)}
+  .state.warn{background:var(--warn-soft); color:var(--warn)}
+  .state.bad{background:var(--bad-soft); color:var(--bad)}
+
+  .details{grid-template-columns:repeat(12,1fr)}
+  .col-6{grid-column:span 6} .col-4{grid-column:span 4} .col-8{grid-column:span 8}
+  @media(max-width:920px){.col-6,.col-4,.col-8{grid-column:span 12}}
+  .front h3,.back h3{margin:0 0 2px; font-size:14.5px; font-weight:700; padding-right:60px}
+  .cap{color:var(--muted); font-size:12px; margin:0 0 14px}
+
+  .barrow{display:grid; grid-template-columns:130px 1fr 54px; align-items:center; gap:10px; margin:9px 0}
+  .barrow .name{font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .barrow .track{height:9px; background:var(--track); border-radius:6px; overflow:hidden}
+  .barrow .fill{height:100%; border-radius:6px; background:linear-gradient(90deg,var(--accent),#37b6c4); width:0; transition:width .8s cubic-bezier(.2,.7,.2,1)}
+  .barrow .val{text-align:right; font-size:12.5px; color:var(--muted); font-weight:600}
+
+  .donutwrap{display:flex; align-items:center; gap:18px}
+  .donut{width:104px; height:104px; flex:none}
+  .donut text{fill:var(--text)}
+  .legend{font-size:12.5px; color:var(--muted)}
+  .legend div{margin:3px 0}
+  .legend b{color:var(--text)}
+
+  table{width:100%; border-collapse:collapse; font-size:13px}
+  th{text-align:left; color:var(--faint); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.4px; padding:0 8px 8px; border-bottom:1px solid var(--border)}
+  td{padding:9px 8px; border-bottom:1px solid var(--border)}
+  tr:last-child td{border-bottom:0}
+  td.r,th.r{text-align:right}
+  .tag{font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px}
+  .tag.bad{background:var(--bad-soft); color:var(--bad)}
+  .tag.warn{background:var(--warn-soft); color:var(--warn)}
+  .tag.good{background:var(--good-soft); color:var(--good)}
+
+  /* back-of-tile */
+  .bk-title{font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; color:var(--muted); margin-bottom:8px}
+  .bk-row{display:flex; justify-content:space-between; gap:10px; font-size:13px; padding:5px 0; border-bottom:1px solid var(--border)}
+  .bk-row:last-of-type{border-bottom:0}
+  .bk-row b{font-variant-numeric:tabular-nums}
+  .bk-action{margin-top:11px; font-size:12.5px; color:var(--muted); display:flex; gap:7px; align-items:flex-start; padding-right:34px}
+  .bk-action svg{width:14px; height:14px; flex:none; margin-top:1px; color:var(--accent)}
+  .spark{width:100%; height:34px; margin:8px 0 2px; display:block}
+  .spark polyline{fill:none; stroke:var(--accent); stroke-width:2.2; vector-effect:non-scaling-stroke; stroke-linejoin:round; stroke-linecap:round}
+  .spark .area{fill:var(--accent-soft); stroke:none}
+
+  .foot{margin-top:22px; color:var(--faint); font-size:12px; text-align:center}
+  a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <div class="logo">M365</div>
+      <div>
+        <h1>M365 Metrics Monitor</h1>
+        <p class="sub">contoso.onmicrosoft.com &middot; click any tile to flip for detail</p>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <span class="badge-proto">PROTOTYPE &middot; SAMPLE DATA</span>
+    <span class="chip" id="refreshed">Refreshed just now</span>
+    <button class="btn" id="refresh">Refresh</button>
+    <button class="btn" id="theme">Theme</button>
+  </header>
+
+  <div class="legendbar">
+    <span class="li"><span class="fresh live static"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>LIVE</span> current as of the last refresh</span>
+    <span class="li"><span class="fresh delayed static"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>~2D</span> reported, 1 to 2 days behind</span>
+    <span class="li"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--faint)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg> click a tile to flip</span>
+  </div>
+
+  <div class="health">
+    <div class="ring">&#10003;</div>
+    <div>
+      <div class="h-main">All Microsoft 365 services healthy</div>
+      <div class="h-sub">34 services reporting normal &middot; last checked 2 minutes ago</div>
+    </div>
+    <div class="spacer"></div>
+    <div class="pills">
+      <span class="hpill warn">1 advisory &middot; Exchange</span>
+      <span class="hpill info">3 message center updates</span>
+    </div>
+    <span class="fresh live"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>LIVE</span>
+  </div>
+
+  <!-- KPI cards -->
+  <div class="grid kpis">
+
+    <div class="card flip kpi good" tabindex="0" role="button" aria-label="Service health, flip for detail">
+      <div class="flip-inner">
+        <div class="face front">
+          <span class="fresh live"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>LIVE</span>
+          <div class="label">Service health</div>
+          <div class="value">Healthy</div>
+          <div class="note"><span class="state good">&#9679; 0 incidents</span></div>
+          <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
+        </div>
+        <div class="face back">
+          <div class="bk-title">Open items</div>
+          <div class="bk-row"><span>Exchange advisory</span><b>EX582104</b></div>
+          <div class="bk-row"><span>Incidents last 7 days</span><b>0</b></div>
+          <div class="bk-row"><span>Message center changes</span><b>3</b></div>
+          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4m0 4h.01M12 3l9 16H3z"/></svg>Next change: new Teams rollout on Aug 20</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card flip kpi warn" tabindex="0" role="button" aria-label="Unused licenses, flip for detail">
+      <div class="flip-inner">
+        <div class="face front">
+          <span class="fresh live"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>LIVE</span>
+          <div class="label">Unused licenses</div>
+          <div class="value tnum">142</div>
+          <div class="note">&asymp; <b>$4,970</b> / month idle</div>
+          <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
+        </div>
+        <div class="face back">
+          <div class="bk-title">Free by plan</div>
+          <div class="bk-row"><span>Copilot</span><b>90</b></div>
+          <div class="bk-row"><span>M365 E3</span><b>90</b></div>
+          <div class="bk-row"><span>M365 E5</span><b>20</b></div>
+          <svg class="spark" viewBox="0 0 100 30" preserveAspectRatio="none"><polyline points="0,22 20,20 40,17 60,14 80,12 100,8"/></svg>
+          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Reclaim the 90 Copilot seats first, biggest cost</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card flip kpi" tabindex="0" role="button" aria-label="Guest users, flip for detail">
+      <div class="flip-inner">
+        <div class="face front">
+          <span class="fresh live"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>LIVE</span>
+          <div class="label">Guest users</div>
+          <div class="value tnum">318</div>
+          <div class="note"><span class="state warn">&#9650; 12 this month</span></div>
+          <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
+        </div>
+        <div class="face back">
+          <div class="bk-title">Guests</div>
+          <div class="bk-row"><span>New this month</span><b>12</b></div>
+          <div class="bk-row"><span>Stale, no sign-in 90d</span><b>129</b></div>
+          <div class="bk-row"><span>Invites never accepted</span><b>8</b></div>
+          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Review 129 stale guests for removal</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card flip kpi" tabindex="0" role="button" aria-label="Storage used, flip for detail">
+      <div class="flip-inner">
+        <div class="face front">
+          <span class="fresh delayed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>~2D</span>
+          <div class="label">Storage used</div>
+          <div class="value tnum">4.2<small> / 25 TB</small></div>
+          <div class="note">17% of tenant quota</div>
+          <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
+        </div>
+        <div class="face back">
+          <div class="bk-title">Where it sits</div>
+          <div class="bk-row"><span>SharePoint</span><b>3.1 TB</b></div>
+          <div class="bk-row"><span>OneDrive</span><b>1.1 TB</b></div>
+          <div class="bk-row"><span>Growth</span><b>42 GB / mo</b></div>
+          <svg class="spark" viewBox="0 0 100 30" preserveAspectRatio="none"><polyline points="0,24 20,22 40,19 60,16 80,13 100,10"/></svg>
+          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>About 40 months to quota at this rate</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card flip kpi bad" tabindex="0" role="button" aria-label="Secrets expiring, flip for detail">
+      <div class="flip-inner">
+        <div class="face front">
+          <span class="fresh live"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>LIVE</span>
+          <div class="label">Secrets expiring &le; 30d</div>
+          <div class="value tnum">3</div>
+          <div class="note"><span class="state bad">&#9679; action needed</span></div>
+          <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
+        </div>
+        <div class="face back">
+          <div class="bk-title">Expiring soon</div>
+          <div class="bk-row"><span>Graph Connector Agent</span><b>4 days</b></div>
+          <div class="bk-row"><span>Intranet Crawler cert</span><b>11 days</b></div>
+          <div class="bk-row"><span>Power BI Gateway</span><b>26 days</b></div>
+          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4m0 4h.01M12 3l9 16H3z"/></svg>Rotate the Graph Connector secret now</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card flip kpi good" tabindex="0" role="button" aria-label="Copilot active, flip for detail">
+      <div class="flip-inner">
+        <div class="face front">
+          <span class="fresh delayed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>~2D</span>
+          <div class="label">Copilot active</div>
+          <div class="value tnum">64%</div>
+          <div class="note">160 of 250 licenses used</div>
+          <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
+        </div>
+        <div class="face back">
+          <div class="bk-title">Active by app</div>
+          <div class="bk-row"><span>Teams</span><b>132</b></div>
+          <div class="bk-row"><span>Word</span><b>88</b></div>
+          <div class="bk-row"><span>Outlook</span><b>76</b></div>
+          <svg class="spark" viewBox="0 0 100 30" preserveAspectRatio="none"><polyline points="0,26 20,23 40,20 60,15 80,12 100,9"/></svg>
+          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4m0 4h.01M12 3l9 16H3z"/></svg>90 licenses assigned but never used</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card flip kpi warn" tabindex="0" role="button" aria-label="Stale accounts, flip for detail">
+      <div class="flip-inner">
+        <div class="face front">
+          <span class="fresh live"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>LIVE</span>
+          <div class="label">Stale accounts</div>
+          <div class="value tnum">47</div>
+          <div class="note">no sign-in in 90 days</div>
+          <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
+        </div>
+        <div class="face back">
+          <div class="bk-title">The 47 accounts</div>
+          <div class="bk-row"><span>Still enabled</span><b>31</b></div>
+          <div class="bk-row"><span>Still holding a paid license</span><b>22</b></div>
+          <div class="bk-row"><span>Oldest last sign-in</span><b>412 days</b></div>
+          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>22 licenses to reclaim by disabling these</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card flip kpi" tabindex="0" role="button" aria-label="Secure Score, flip for detail">
+      <div class="flip-inner">
+        <div class="face front">
+          <span class="fresh delayed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>~2D</span>
+          <div class="label">Secure Score</div>
+          <div class="value tnum">72%</div>
+          <div class="note"><span class="state good">&#9650; 4 pts this month</span></div>
+          <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
+        </div>
+        <div class="face back">
+          <div class="bk-title">Top point gains</div>
+          <div class="bk-row"><span>Require MFA for admins</span><b>+18</b></div>
+          <div class="bk-row"><span>Block legacy auth</span><b>+12</b></div>
+          <div class="bk-row"><span>vs similar orgs</span><b>72 vs 69</b></div>
+          <svg class="spark" viewBox="0 0 100 30" preserveAspectRatio="none"><polyline points="0,20 20,19 40,16 60,15 80,12 100,11"/></svg>
+          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>MFA for admins is the biggest quick win</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- detail cards -->
+  <div class="grid details">
+
+    <div class="card flip col-4" tabindex="0" role="button" aria-label="Users by domain, flip for detail">
+      <div class="flip-inner">
+        <div class="face front">
+          <span class="fresh live"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>LIVE</span>
+          <h3>Users by domain</h3>
+          <p class="cap">1,945 users across 4 verified domains</p>
+          <div class="bars">
+            <div class="barrow"><span class="name">contoso.com</span><span class="track"><span class="fill" data-w="100"></span></span><span class="val tnum">1,240</span></div>
+            <div class="barrow"><span class="name">contoso.onmicrosoft.com</span><span class="track"><span class="fill" data-w="25"></span></span><span class="val tnum">310</span></div>
+            <div class="barrow"><span class="name">partner.contoso.com</span><span class="track"><span class="fill" data-w="24"></span></span><span class="val tnum">297</span></div>
+            <div class="barrow"><span class="name">contoso.co.uk</span><span class="track"><span class="fill" data-w="8"></span></span><span class="val tnum">98</span></div>
+          </div>
+          <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
+        </div>
+        <div class="face back">
+          <div class="bk-title">Across all domains</div>
+          <div class="bk-row"><span>Enabled</span><b>1,860</b></div>
+          <div class="bk-row"><span>Disabled</span><b>85</b></div>
+          <div class="bk-row"><span>Unlicensed</span><b>112</b></div>
+          <div class="bk-row"><span>New this month</span><b>34</b></div>
+          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>112 unlicensed accounts to review</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card flip col-4" tabindex="0" role="button" aria-label="Sites by template, flip for detail">
+      <div class="flip-inner">
+        <div class="face front">
+          <span class="fresh delayed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>~2D</span>
+          <h3>Sites by template</h3>
+          <p class="cap">1,406 SharePoint sites</p>
+          <div class="bars">
+            <div class="barrow"><span class="name">Team site (Group)</span><span class="track"><span class="fill" data-w="100"></span></span><span class="val tnum">824</span></div>
+            <div class="barrow"><span class="name">Communication</span><span class="track"><span class="fill" data-w="26"></span></span><span class="val tnum">214</span></div>
+            <div class="barrow"><span class="name">Team site (classic)</span><span class="track"><span class="fill" data-w="23"></span></span><span class="val tnum">188</span></div>
+            <div class="barrow"><span class="name">Channel site</span><span class="track"><span class="fill" data-w="16"></span></span><span class="val tnum">132</span></div>
+            <div class="barrow"><span class="name">Other</span><span class="track"><span class="fill" data-w="6"></span></span><span class="val tnum">48</span></div>
+          </div>
+          <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
+        </div>
+        <div class="face back">
+          <div class="bk-title">Site health</div>
+          <div class="bk-row"><span>Inactive 90 days</span><b>210</b></div>
+          <div class="bk-row"><span>Empty sites</span><b>64</b></div>
+          <div class="bk-row"><span>New this month</span><b>22</b></div>
+          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>210 inactive sites are cleanup candidates</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card flip col-4" tabindex="0" role="button" aria-label="Tenant storage, flip for detail">
+      <div class="flip-inner">
+        <div class="face front">
+          <span class="fresh delayed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>~2D</span>
+          <h3>Tenant storage</h3>
+          <p class="cap">SharePoint + OneDrive</p>
+          <div class="donutwrap">
+            <svg class="donut" viewBox="0 0 42 42" role="img" aria-label="17 percent used">
+              <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--track)" stroke-width="5"></circle>
+              <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--accent)" stroke-width="5" stroke-dasharray="17 83" stroke-dashoffset="25" stroke-linecap="round"></circle>
+              <text x="21" y="21" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="700">17%</text>
+            </svg>
+            <div class="legend">
+              <div><b>4.2 TB</b> used</div>
+              <div><b>25 TB</b> licensed quota</div>
+              <div>20.8 TB free</div>
+            </div>
+          </div>
+          <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
+        </div>
+        <div class="face back">
+          <div class="bk-title">Split</div>
+          <div class="bk-row"><span>SharePoint sites</span><b>3.1 TB</b></div>
+          <div class="bk-row"><span>OneDrive</span><b>1.1 TB</b></div>
+          <div class="bk-row"><span>Sites over 90% quota</span><b>7</b></div>
+          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4m0 4h.01M12 3l9 16H3z"/></svg>7 sites near their quota, warn the owners</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card flip col-8" tabindex="0" role="button" aria-label="Top sites by storage, flip for detail">
+      <div class="flip-inner">
+        <div class="face front">
+          <span class="fresh delayed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>~2D</span>
+          <h3>Top sites by storage</h3>
+          <p class="cap">Largest 5 of 1,406 sites</p>
+          <table>
+            <thead><tr><th>Site</th><th>Template</th><th class="r">Files</th><th class="r">Storage</th><th class="r">Last activity</th></tr></thead>
+            <tbody>
+              <tr><td>Marketing Hub</td><td>Communication</td><td class="r tnum">142,301</td><td class="r tnum">318 GB</td><td class="r">today</td></tr>
+              <tr><td>Engineering Team</td><td>Team site</td><td class="r tnum">98,442</td><td class="r tnum">274 GB</td><td class="r">today</td></tr>
+              <tr><td>Records Archive</td><td>Team site (classic)</td><td class="r tnum">210,880</td><td class="r tnum">251 GB</td><td class="r">14 days ago</td></tr>
+              <tr><td>Sales Enablement</td><td>Communication</td><td class="r tnum">61,209</td><td class="r tnum">190 GB</td><td class="r">yesterday</td></tr>
+              <tr><td>All Company</td><td>Team site (Group)</td><td class="r tnum">44,905</td><td class="r tnum">176 GB</td><td class="r">today</td></tr>
+            </tbody>
+          </table>
+          <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
+        </div>
+        <div class="face back">
+          <div class="bk-title">Fastest growing</div>
+          <div class="bk-row"><span>Marketing Hub</span><b>+22 GB / mo</b></div>
+          <div class="bk-row"><span>Records Archive</span><b>+14 GB / mo</b></div>
+          <div class="bk-row"><span>Engineering Team</span><b>+11 GB / mo</b></div>
+          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4m0 4h.01M12 3l9 16H3z"/></svg>Records Archive is inactive yet still growing</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card flip col-4" tabindex="0" role="button" aria-label="Licenses, flip for detail">
+      <div class="flip-inner">
+        <div class="face front">
+          <span class="fresh live"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>LIVE</span>
+          <h3>Licenses</h3>
+          <p class="cap">Assigned vs owned</p>
+          <table>
+            <thead><tr><th>Plan</th><th class="r">Used</th><th class="r">Owned</th><th class="r">Free</th></tr></thead>
+            <tbody>
+              <tr><td>M365 E3</td><td class="r tnum">1,610</td><td class="r tnum">1,700</td><td class="r"><span class="tag warn">90</span></td></tr>
+              <tr><td>M365 E5</td><td class="r tnum">180</td><td class="r tnum">200</td><td class="r"><span class="tag warn">20</span></td></tr>
+              <tr><td>Copilot</td><td class="r tnum">160</td><td class="r tnum">250</td><td class="r"><span class="tag bad">90</span></td></tr>
+              <tr><td>Exchange P1</td><td class="r tnum">42</td><td class="r tnum">45</td><td class="r"><span class="tag good">3</span></td></tr>
+            </tbody>
+          </table>
+          <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
+        </div>
+        <div class="face back">
+          <div class="bk-title">Monthly cost (your rates)</div>
+          <div class="bk-row"><span>M365 E3</span><b>$22,600</b></div>
+          <div class="bk-row"><span>Copilot</span><b>$4,800</b></div>
+          <div class="bk-row"><span>Total spend</span><b>$34,000</b></div>
+          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4m0 4h.01M12 3l9 16H3z"/></svg>Prices are set in Settings, Graph has no pricing</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card flip col-6" tabindex="0" role="button" aria-label="App secrets expiring, flip for detail">
+      <div class="flip-inner">
+        <div class="face front">
+          <span class="fresh live"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>LIVE</span>
+          <h3>App secrets &amp; certificates expiring</h3>
+          <p class="cap">Next 60 days &middot; app registrations</p>
+          <table>
+            <thead><tr><th>App registration</th><th>Type</th><th class="r">Expires in</th></tr></thead>
+            <tbody>
+              <tr><td>Graph Connector Agent</td><td>Secret</td><td class="r"><span class="tag bad">4 days</span></td></tr>
+              <tr><td>Intranet Search Crawler</td><td>Certificate</td><td class="r"><span class="tag bad">11 days</span></td></tr>
+              <tr><td>Power BI Gateway</td><td>Secret</td><td class="r"><span class="tag warn">26 days</span></td></tr>
+              <tr><td>HR Sync Job</td><td>Secret</td><td class="r"><span class="tag warn">48 days</span></td></tr>
+            </tbody>
+          </table>
+          <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
+        </div>
+        <div class="face back">
+          <div class="bk-title">Also worth knowing</div>
+          <div class="bk-row"><span>Already expired</span><b>1</b></div>
+          <div class="bk-row"><span>Apps with no expiry set</span><b>3</b></div>
+          <div class="bk-row"><span>Apps unused 90 days</span><b>5</b></div>
+          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4m0 4h.01M12 3l9 16H3z"/></svg>1 credential is already expired, check its app still runs</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card flip col-6" tabindex="0" role="button" aria-label="Workload activity, flip for detail">
+      <div class="flip-inner">
+        <div class="face front">
+          <span class="fresh delayed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>~2D</span>
+          <h3>Workload activity</h3>
+          <p class="cap">Active users, last 28 days</p>
+          <div class="bars">
+            <div class="barrow"><span class="name">Teams</span><span class="track"><span class="fill" data-w="94"></span></span><span class="val tnum">1,820</span></div>
+            <div class="barrow"><span class="name">SharePoint</span><span class="track"><span class="fill" data-w="82"></span></span><span class="val tnum">1,588</span></div>
+            <div class="barrow"><span class="name">Exchange</span><span class="track"><span class="fill" data-w="97"></span></span><span class="val tnum">1,881</span></div>
+            <div class="barrow"><span class="name">OneDrive</span><span class="track"><span class="fill" data-w="71"></span></span><span class="val tnum">1,372</span></div>
+            <div class="barrow"><span class="name">Copilot</span><span class="track"><span class="fill" data-w="8"></span></span><span class="val tnum">160</span></div>
+          </div>
+          <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
+        </div>
+        <div class="face back">
+          <div class="bk-title">Adoption (active of total)</div>
+          <div class="bk-row"><span>Exchange</span><b>97%</b></div>
+          <div class="bk-row"><span>Teams</span><b>94%</b></div>
+          <div class="bk-row"><span>Copilot</span><b>8%</b></div>
+          <svg class="spark" viewBox="0 0 100 30" preserveAspectRatio="none"><polyline points="0,26 20,24 40,22 60,19 80,16 100,14"/></svg>
+          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4m0 4h.01M12 3l9 16H3z"/></svg>Copilot adoption is the laggard at 8%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card flip col-6" tabindex="0" role="button" aria-label="Governance watch, flip for detail">
+      <div class="flip-inner">
+        <div class="face front">
+          <span class="fresh live"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>LIVE</span>
+          <h3>Governance watch</h3>
+          <p class="cap">Things that quietly become problems</p>
+          <table>
+            <tbody>
+              <tr><td>Ownerless Microsoft 365 groups</td><td class="r"><span class="tag warn">23</span></td></tr>
+              <tr><td>Sites sharing with anyone links</td><td class="r"><span class="tag bad">37</span></td></tr>
+              <tr><td>Empty groups</td><td class="r"><span class="tag warn">61</span></td></tr>
+              <tr><td>Guests with no sign-in 90 days</td><td class="r"><span class="tag warn">129</span></td></tr>
+              <tr><td>Admin role holders</td><td class="r"><span class="tag good">9</span></td></tr>
+            </tbody>
+          </table>
+          <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
+        </div>
+        <div class="face back">
+          <div class="bk-title">Anyone-link sites (top)</div>
+          <div class="bk-row"><span>Marketing Hub</span><b>14 links</b></div>
+          <div class="bk-row"><span>Sales Enablement</span><b>9 links</b></div>
+          <div class="bk-row"><span>Vendor Portal</span><b>6 links</b></div>
+          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>Open the Sharing Link Auditor for the full list</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card flip col-6" tabindex="0" role="button" aria-label="Security posture, flip for detail">
+      <div class="flip-inner">
+        <div class="face front">
+          <span class="fresh delayed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>~2D</span>
+          <h3>Security posture</h3>
+          <p class="cap">Microsoft Secure Score</p>
+          <div class="donutwrap">
+            <svg class="donut" viewBox="0 0 42 42" role="img" aria-label="72 percent secure score">
+              <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--track)" stroke-width="5"></circle>
+              <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--good)" stroke-width="5" stroke-dasharray="72 28" stroke-dashoffset="25" stroke-linecap="round"></circle>
+              <text x="21" y="21" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="700">72%</text>
+            </svg>
+            <div class="legend">
+              <div><b>612</b> of 850 points</div>
+              <div>MFA coverage <b>88%</b></div>
+              <div>Conditional Access <b>7</b> policies</div>
+            </div>
+          </div>
+          <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
+        </div>
+        <div class="face back">
+          <div class="bk-title">MFA and access</div>
+          <div class="bk-row"><span>Registered for MFA</span><b>88%</b></div>
+          <div class="bk-row"><span>Admins without MFA</span><b>1</b></div>
+          <div class="bk-row"><span>Legacy auth</span><b>allowed</b></div>
+          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4m0 4h.01M12 3l9 16H3z"/></svg>1 admin without MFA is the urgent fix</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <p class="foot">
+    Prototype with sample data. Click a tile to flip it for the breakdown, a trend, and one action.
+    Trend lines on LIVE tiles would need the tool to keep its own daily snapshots, since Graph does not store history for directory counts.
+  </p>
+
+</div>
+
+<script>
+  const root = document.documentElement;
+  document.getElementById('theme').addEventListener('click', ()=>{
+    const now = root.getAttribute('data-theme');
+    const next = now === 'dark' ? 'light' : (now === 'light' ? 'dark'
+                 : (matchMedia('(prefers-color-scheme: dark)').matches ? 'light' : 'dark'));
+    root.setAttribute('data-theme', next);
+  });
+
+  // click / keyboard to flip
+  document.querySelectorAll('.card.flip').forEach(card=>{
+    card.addEventListener('click', ()=> card.classList.toggle('flipped'));
+    card.addEventListener('keydown', e=>{
+      if(e.key==='Enter' || e.key===' '){ e.preventDefault(); card.classList.toggle('flipped'); }
+    });
+  });
+
+  function drawBars(){
+    document.querySelectorAll('.fill').forEach(f=>{
+      f.style.width = '0';
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{ f.style.width = f.dataset.w + '%'; }));
+    });
+  }
+  drawBars();
+  document.getElementById('refresh').addEventListener('click', ()=>{
+    document.getElementById('refreshed').textContent = 'Refreshed just now';
+    drawBars();
+  });
+</script>
+</body>
+</html>

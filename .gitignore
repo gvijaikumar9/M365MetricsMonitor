@@ -1,0 +1,10 @@
+bin/
+obj/
+.vs/
+*.user
+*.suo
+
+# Never commit the real secret. Ship appsettings.example.json instead.
+appsettings.json
+appsettings.*.json
+!appsettings.example.json
