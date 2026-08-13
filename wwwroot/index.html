@@ -213,6 +213,19 @@
   .kpi.good .kpi-icon{background:var(--good-soft); color:var(--good)}
   .kpi.warn .kpi-icon{background:var(--warn-soft); color:var(--warn)}
   .kpi.bad .kpi-icon{background:var(--bad-soft); color:var(--bad)}
+  /* list / view-all page */
+  .listhead{display:flex; align-items:center; gap:14px; margin-bottom:16px; flex-wrap:wrap}
+  .listhead h2{margin:0; font-size:18px; font-weight:700}
+  #listSearch{margin-left:auto; padding:8px 12px; border:1px solid var(--border); border-radius:9px; background:var(--surface); color:var(--text); font-size:13px; min-width:220px}
+  .listwrap{overflow-x:auto}
+  .listtable{width:100%; border-collapse:collapse; font-size:13px}
+  .listtable th{text-align:left; color:var(--faint); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.4px; padding:8px; border-bottom:1px solid var(--border); cursor:pointer; white-space:nowrap; user-select:none}
+  .listtable th:hover{color:var(--accent)}
+  .listtable td{padding:9px 8px; border-bottom:1px solid var(--border)}
+  .listtable tbody tr:hover td{background:var(--surface-2)}
+  .listtable a{color:var(--accent); text-decoration:none}
+  .card-link{display:inline-flex; align-items:center; gap:5px; margin-top:12px; font-size:12.5px; font-weight:600; color:var(--accent); cursor:pointer}
+  .card-link:hover{gap:8px}
   @media(max-width:820px){ .app{grid-template-columns:1fr} .sidebar{position:static; height:auto; flex-direction:row; flex-wrap:wrap; align-items:center} .nav{flex-direction:row; flex-wrap:wrap} .side-logo{margin:0 8px 0 0} .side-foot{margin:0 0 0 auto} }
 </style>
 </head>
@@ -225,6 +238,11 @@
     </div>
     <nav class="nav">
       <a class="nav-item active" data-page="overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg><span>Overview</span></a>
+      <a class="nav-item" data-page="services"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="7" rx="1.5"/><rect x="3" y="13" width="18" height="7" rx="1.5"/><path d="M7 7.5h.01M7 16.5h.01"/></svg><span>Services</span></a>
+      <a class="nav-item" data-page="users"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="7" r="4"/></svg><span>Users</span></a>
+      <a class="nav-item" data-page="storage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg><span>Storage</span></a>
+      <a class="nav-item" data-page="licenses"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2.2"/><path d="M14 9h4M14 13h4M5.5 16a3.5 3.5 0 0 1 7 0"/></svg><span>Licenses</span></a>
+      <a class="nav-item" data-page="secrets"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>Security</span></a>
       <a class="nav-item" data-page="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg><span>Settings</span></a>
     </nav>
     <div class="side-bottom">
@@ -390,18 +408,18 @@
     <div class="card flip kpi warn" tabindex="0" role="button" aria-label="Stale accounts, flip for detail">
       <div class="flip-inner">
         <div class="face front">
-          <span class="fresh live"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>LIVE</span>
+          <span class="fresh" style="background:var(--track);color:var(--faint)">P1</span>
           <div class="label">Stale accounts</div>
-          <div class="value tnum">47</div>
-          <div class="note">no sign-in in 90 days</div>
+          <div class="value tnum">n/a</div>
+          <div class="note">needs Entra ID P1</div>
           <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
         </div>
         <div class="face back">
-          <div class="bk-title">The 47 accounts</div>
-          <div class="bk-row"><span>Still enabled</span><b>31</b></div>
-          <div class="bk-row"><span>Still holding a paid license</span><b>22</b></div>
-          <div class="bk-row"><span>Oldest last sign-in</span><b>412 days</b></div>
-          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>22 licenses to reclaim by disabling these</div>
+          <div class="bk-title">Not available</div>
+          <div class="bk-row"><span>Stale accounts read</span><b>signInActivity</b></div>
+          <div class="bk-row"><span>Which needs</span><b>AuditLog.Read.All</b></div>
+          <div class="bk-row"><span>And a licence</span><b>Entra ID P1</b></div>
+          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4m0 4h.01M12 3l9 16H3z"/></svg>Grant the scope and add P1 to light this tile up</div>
         </div>
       </div>
     </div>
@@ -707,6 +725,15 @@
       </div>
     </section>
 
+    <section class="page" id="page-list" hidden>
+      <div class="listhead">
+        <button class="btn" id="listBack">&larr; Overview</button>
+        <h2 id="listTitle">List</h2>
+        <input id="listSearch" placeholder="Filter...">
+      </div>
+      <div class="card"><div class="listwrap"><table class="listtable"><thead id="listHead"></thead><tbody id="listBody"></tbody></table></div></div>
+    </section>
+
   </main>
 </div>
 
@@ -778,6 +805,7 @@
                  '<td class="r"><span class="tag '+cls+'">'+free+'</span></td></tr>';
         }).join('');
       }
+      addCardLink(card, 'View all '+d.skus.length, 'licenses');
       const totalFree = paid.reduce((a,s)=>a+Math.max(0, s.free||0), 0);
       const kpi = kpiByLabel('Unused licenses');
       const val = kpi && kpi.querySelector('.value');
@@ -805,6 +833,13 @@
         ring.style.background = d.healthy ? 'var(--good-soft)' : 'var(--warn-soft)';
         ring.style.color = d.healthy ? 'var(--good)' : 'var(--warn)';
         ring.innerHTML = d.healthy ? '&#10003;' : '&#9888;';
+      }
+      const stripPills = document.querySelector('.health .pills');
+      if(stripPills){
+        let sl = stripPills.querySelector('.strip-link');
+        if(!sl){ sl = document.createElement('a'); sl.className = 'card-link strip-link'; sl.style.margin = '0';
+          sl.addEventListener('click', ()=> goToArea('services')); stripPills.appendChild(sl); }
+        sl.innerHTML = 'View all '+d.total+' &rarr;';
       }
       const kpi = kpiByLabel('Service health');
       if(kpi){
@@ -854,6 +889,7 @@
         if(cap) cap.textContent = d.total.toLocaleString()+' users across '+d.domains.length+' domains';
         const bars = card.querySelector('.bars');
         if(bars) bars.innerHTML = barsHtml(d.domains, 'domain', 'count');
+        addCardLink(card, 'View all '+d.total, 'users');
       }
       const kpi = kpiByLabel('Guest users');
       if(kpi){
@@ -868,15 +904,17 @@
       if(!d || d.error){ if(d && d.error) console.warn('secrets:', d); return; }
       const card = cardByHeading('App secrets & certificates expiring');
       const tbody = card && card.querySelector('tbody');
+      const soon = (d.items||[]).filter(i=> i.days <= 60).slice(0, 8);
       if(tbody){
-        tbody.innerHTML = d.items.length
-          ? d.items.map(i=>{
+        tbody.innerHTML = soon.length
+          ? soon.map(i=>{
               const cls = i.days <= 7 ? 'bad' : (i.days <= 30 ? 'warn' : 'good');
               const label = i.days < 0 ? 'expired' : (i.days + ' day' + (i.days===1?'':'s'));
               return '<tr><td>'+i.app+'</td><td>'+i.type+'</td><td class="r"><span class="tag '+cls+'">'+label+'</span></td></tr>';
             }).join('')
           : '<tr><td colspan="3">Nothing expiring in the next 60 days</td></tr>';
       }
+      addCardLink(card, 'View all '+((d.items||[]).length), 'secrets');
       const kpi = kpiByLabel('Secrets expiring ≤ 30d');
       if(kpi){
         const val = kpi.querySelector('.value'); if(val) val.textContent = d.expiring30;
@@ -896,6 +934,7 @@
       if(tcard){
         const cap = tcard.querySelector('.cap'); if(cap) cap.textContent = d.totalSites.toLocaleString()+' SharePoint sites';
         const bars = tcard.querySelector('.bars'); if(bars) bars.innerHTML = barsHtml(d.templates, 'template', 'count');
+        addCardLink(tcard, 'View all '+d.totalSites+' sites', 'storage');
       }
       const scard = cardByHeading('Top sites by storage');
       const stbody = scard && scard.querySelector('tbody');
@@ -905,6 +944,7 @@
           '<td class="r tnum">'+(s.files||0).toLocaleString()+'</td><td class="r tnum">'+s.gb+' GB</td>'+
           '<td class="r">'+(s.last||'')+'</td></tr>').join('');
       }
+      if(scard) addCardLink(scard, 'View all '+d.totalSites+' sites', 'storage');
       const kpi = kpiByLabel('Storage used');
       if(kpi){
         const val = kpi.querySelector('.value'); if(val) val.textContent = disp;
@@ -994,15 +1034,137 @@
     loadLive(); loadServiceHealth(); loadOrg(); loadUsers(); loadSecrets(); loadStorage(); loadCopilot(); loadWorkload(); loadGovernance(); loadSecureScore();
   }
 
-  // --- sidebar routing (same-tab pages) ---
-  document.querySelectorAll('.nav-item').forEach(a=>{
-    a.addEventListener('click', ()=>{
-      const page = a.dataset.page;
-      document.querySelectorAll('.nav-item').forEach(x=>x.classList.toggle('active', x===a));
+  // --- routing (same-tab pages; area names open the reusable list page) ---
+  function goPage(page){
+    if(page === 'overview' || page === 'settings'){
       document.querySelectorAll('.page').forEach(p=>{ p.hidden = (p.id !== 'page-'+page); });
       if(page === 'settings') buildSettings();
-    });
-  });
+    } else {
+      document.querySelectorAll('.page').forEach(p=>{ p.hidden = (p.id !== 'page-list'); });
+      openList(page);
+    }
+    window.scrollTo(0,0);
+  }
+  function goToArea(area){
+    document.querySelectorAll('.nav-item').forEach(x=>x.classList.toggle('active', x.dataset.page===area));
+    goPage(area);
+  }
+  document.querySelectorAll('.nav-item').forEach(a=> a.addEventListener('click', ()=> goToArea(a.dataset.page)));
+  const listBack = document.getElementById('listBack');
+  if(listBack) listBack.addEventListener('click', ()=> goToArea('overview'));
+
+  // --- reusable "view all" list page, driven by per-area configs ---
+  const AREAS = {
+    secrets: {
+      title: 'App secrets & certificates',
+      endpoint: '/api/secrets',
+      rows: d => d.items || [],
+      cols: [
+        { label:'App registration', get:i=>i.app },
+        { label:'Type', get:i=>i.type },
+        { label:'Expires in', get:i=> i.days < 0 ? ('expired '+(-i.days)+'d ago') : (i.days+' days'),
+          tag:i=> i.days<=7?'bad':(i.days<=30?'warn':'') },
+        { label:'', raw:true, get:i=> i.appId
+            ? '<a href="https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Credentials/appId/'+i.appId+'" target="_blank" rel="noopener">open in Entra &rarr;</a>' : '' }
+      ]
+    },
+    services: {
+      title: 'Microsoft 365 services',
+      endpoint: '/api/servicehealth',
+      rows: d => d.all || [],
+      cols: [
+        { label:'Service', get:i=>i.service },
+        { label:'Status', get:i=> (i.status||'').replace(/^Service/,'').replace(/([a-z])([A-Z])/g,'$1 $2') || 'Operational',
+          tag:i=> i.status==='ServiceOperational' ? 'good' : 'warn' }
+      ]
+    },
+    storage: {
+      title: 'SharePoint sites',
+      endpoint: '/api/storage',
+      rows: d => d.all || [],
+      cols: [
+        { label:'Site', get:i=>i.url },
+        { label:'Template', get:i=>i.template },
+        { label:'Files', num:true, get:i=>i.files },
+        { label:'Storage (GB)', num:true, get:i=>i.gb },
+        { label:'Last activity', get:i=>i.last || '' }
+      ]
+    },
+    users: {
+      title: 'Users',
+      endpoint: '/api/users',
+      rows: d => d.list || [],
+      cols: [
+        { label:'Name', get:i=>i.name || '(no name)' },
+        { label:'User principal name', get:i=>i.upn },
+        { label:'Type', get:i=>i.type },
+        { label:'Domain', get:i=>i.domain },
+        { label:'Status', get:i=> i.enabled ? 'enabled' : 'disabled', tag:i=> i.enabled ? '' : 'warn' }
+      ]
+    },
+    licenses: {
+      title: 'Licenses',
+      endpoint: '/api/licenses',
+      rows: d => d.skus || [],
+      cols: [
+        { label:'Plan', get:i=>i.name },
+        { label:'SKU', get:i=>i.sku },
+        { label:'Kind', get:i=> i.isFree ? 'self-service' : 'paid' },
+        { label:'Used', num:true, get:i=>i.used },
+        { label:'Owned', num:true, get:i=>i.owned },
+        { label:'Free', num:true, get:i=>i.free }
+      ]
+    }
+  };
+  let listState = { cfg:null, data:[], dir:1 };
+  function openList(area){
+    const cfg = AREAS[area];
+    document.getElementById('listTitle').textContent = cfg ? cfg.title : area;
+    document.getElementById('listSearch').value = '';
+    const head = document.getElementById('listHead'), body = document.getElementById('listBody');
+    if(!cfg){ head.innerHTML=''; body.innerHTML = '<tr><td>Coming soon</td></tr>'; return; }
+    body.innerHTML = '<tr><td>Loading…</td></tr>';
+    fetch(cfg.endpoint).then(r=>r.json()).then(d=>{
+      listState = { cfg, data: cfg.rows(d).slice(), dir:1 };
+      renderList();
+    }).catch(()=>{ body.innerHTML = '<tr><td>Could not load</td></tr>'; });
+  }
+  function renderList(){
+    const cfg = listState.cfg; if(!cfg) return;
+    const head = document.getElementById('listHead'), body = document.getElementById('listBody');
+    head.innerHTML = '<tr>'+cfg.cols.map((c,idx)=>'<th data-col="'+idx+'"'+(c.num?' class="r"':'')+'>'+c.label+'</th>').join('')+'</tr>';
+    const q = (document.getElementById('listSearch').value||'').toLowerCase();
+    let rows = listState.data;
+    if(q) rows = rows.filter(i=> cfg.cols.some(c=> !c.raw && String(c.get(i)).toLowerCase().includes(q)));
+    body.innerHTML = rows.length ? rows.map(i=> '<tr>'+cfg.cols.map(c=>{
+      const v = c.get(i);
+      if(c.raw) return '<td>'+v+'</td>';
+      if(c.num) return '<td class="r tnum">'+Number(v).toLocaleString()+'</td>';
+      if(c.tag){ const t=c.tag(i); return '<td>'+(t?'<span class="tag '+t+'">'+v+'</span>':v)+'</td>'; }
+      return '<td>'+v+'</td>';
+    }).join('')+'</tr>').join('') : '<tr><td>No items</td></tr>';
+    head.querySelectorAll('th').forEach(th=> th.addEventListener('click', ()=>{
+      const c = cfg.cols[+th.dataset.col]; if(c.raw) return;
+      listState.data.sort((a,b)=>{ const av=c.get(a), bv=c.get(b); return (av>bv?1:av<bv?-1:0)*listState.dir; });
+      listState.dir *= -1; renderList();
+    }));
+  }
+  const listSearch = document.getElementById('listSearch');
+  if(listSearch) listSearch.addEventListener('input', renderList);
+
+  // adds/updates a "View all N ->" link on a card front, routing to an area
+  function addCardLink(card, text, area){
+    if(!card) return;
+    const front = card.querySelector('.face.front') || card;
+    let link = front.querySelector('.card-link');
+    if(!link){
+      link = document.createElement('a'); link.className = 'card-link';
+      link.addEventListener('click', e=>{ e.stopPropagation(); goToArea(link.dataset.area); });
+      front.appendChild(link);
+    }
+    link.innerHTML = text + ' <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+    link.dataset.area = area;
+  }
 
   // --- feedback opens the Web3Forms browser page ---
   const fb = document.getElementById('feedbackBtn');

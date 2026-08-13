@@ -101,7 +101,12 @@ app.MapGet("/api/servicehealth", async () =>
         }
         catch { /* messages unavailable, leave 0 */ }
 
-        return Results.Json(new { total = svcs.Count, healthy = issues.Count == 0, issues, messageCenter });
+        var all = svcs
+            .Select(s => new { service = s.Service, status = s.Status?.ToString() ?? "" })
+            .OrderBy(s => s.status == "ServiceOperational" ? 1 : 0)
+            .ThenBy(s => s.service)
+            .ToList();
+        return Results.Json(new { total = svcs.Count, healthy = issues.Count == 0, issues, messageCenter, all });
     }
     catch (Exception ex) { return Results.Json(new { error = "graph_error", message = Describe(ex) }); }
 });
@@ -128,25 +133,26 @@ app.MapGet("/api/secrets", async () =>
     {
         var resp = await G().Applications.GetAsync(rc =>
         {
-            rc.QueryParameters.Select = new[] { "displayName", "passwordCredentials", "keyCredentials" };
+            rc.QueryParameters.Select = new[] { "displayName", "appId", "passwordCredentials", "keyCredentials" };
             rc.QueryParameters.Top = 999;
         });
         var now = DateTimeOffset.UtcNow;
-        var raw = new List<(string app, string type, int days)>();
+        var raw = new List<(string app, string appId, string type, int days)>();
         foreach (var a in resp?.Value ?? new())
         {
             void Consider(DateTimeOffset? end, string type)
             {
                 if (end is null) return;
                 var days = (int)Math.Floor((end.Value - now).TotalDays);
-                if (days <= 60) raw.Add((a.DisplayName ?? "(unnamed app)", type, days));
+                raw.Add((a.DisplayName ?? "(unnamed app)", a.AppId ?? "", type, days));
             }
             foreach (var p in a.PasswordCredentials ?? new()) Consider(p.EndDateTime, "Secret");
             foreach (var k in a.KeyCredentials ?? new()) Consider(k.EndDateTime, "Certificate");
         }
         var expiring30 = raw.Count(x => x.days <= 30);
-        var items = raw.OrderBy(x => x.days).Take(12)
-            .Select(x => new { app = x.app, type = x.type, days = x.days }).ToList();
+        // full list, sorted soonest first (the tile slices; the "View all" page shows everything)
+        var items = raw.OrderBy(x => x.days)
+            .Select(x => new { app = x.app, appId = x.appId, type = x.type, days = x.days }).ToList();
         return Results.Json(new { expiring30, items });
     }
     catch (Exception ex) { return Results.Json(new { error = "graph_error", message = Describe(ex) }); }
@@ -160,23 +166,33 @@ app.MapGet("/api/users", async () =>
     {
         var resp = await G().Users.GetAsync(rc =>
         {
-            rc.QueryParameters.Select = new[] { "userPrincipalName", "userType" };
+            rc.QueryParameters.Select = new[] { "displayName", "userPrincipalName", "userType", "accountEnabled" };
             rc.QueryParameters.Top = 999;
         });
         var counts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         int total = 0, guests = 0;
+        var list = new List<object>();
         foreach (var u in resp?.Value ?? new())
         {
             total++;
-            if (string.Equals(u.UserType, "Guest", StringComparison.OrdinalIgnoreCase)) { guests++; continue; }
             var upn = u.UserPrincipalName ?? "";
             var at = upn.LastIndexOf('@');
             var dom = at >= 0 ? upn[(at + 1)..] : "(none)";
-            counts[dom] = counts.GetValueOrDefault(dom) + 1;
+            var isGuest = string.Equals(u.UserType, "Guest", StringComparison.OrdinalIgnoreCase);
+            if (isGuest) guests++;
+            else counts[dom] = counts.GetValueOrDefault(dom) + 1;
+            list.Add(new
+            {
+                name = u.DisplayName ?? "",
+                upn,
+                type = isGuest ? "Guest" : "Member",
+                domain = dom,
+                enabled = u.AccountEnabled ?? true
+            });
         }
         var domains = counts.OrderByDescending(kv => kv.Value).Take(6)
             .Select(kv => new { domain = kv.Key, count = kv.Value }).ToList();
-        return Results.Json(new { total, guests, domains });
+        return Results.Json(new { total, guests, domains, list });
     }
     catch (Exception ex) { return Results.Json(new { error = "graph_error", message = Describe(ex) }); }
 });
@@ -219,10 +235,19 @@ app.MapGet("/api/storage", async () =>
                 gb = Math.Round(s.bytes / 1073741824.0, 1),
                 last = s.last
             }).ToList();
+        var all = sites.OrderByDescending(s => s.bytes)
+            .Select(s => new
+            {
+                url = SiteName(s.url),
+                template = FriendlyTemplate(s.tmpl),
+                files = s.files,
+                gb = Math.Round(s.bytes / 1073741824.0, 2),
+                last = s.last
+            }).ToList();
         var templates = byTemplate.OrderByDescending(kv => kv.Value).Take(6)
             .Select(kv => new { template = FriendlyTemplate(kv.Key), count = kv.Value }).ToList();
         double totalGB = Math.Round(totalBytes / 1073741824.0, 1);
-        return Results.Json(new { totalSites = sites.Count, totalGB, totalTB = Math.Round(totalGB / 1024.0, 2), templates, top });
+        return Results.Json(new { totalSites = sites.Count, totalGB, totalTB = Math.Round(totalGB / 1024.0, 2), templates, top, all });
     }
     catch (Exception ex) { return Results.Json(new { error = "graph_error", message = Describe(ex) }); }
 });
