@@ -36,6 +36,205 @@ ClientSecretCredential Cred() => credential ??= new ClientSecretCredential(tenan
 GraphServiceClient G() => graph ??= new GraphServiceClient(Cred(), new[] { "https://graph.microsoft.com/.default" });
 bool Configured() => !NotConfigured(tenantId) && !NotConfigured(clientId) && !NotConfigured(clientSecret);
 
+// Save connection settings from the UI: update runtime, reset the Graph client, persist to appsettings.json.
+var appsettingsPath = Path.Combine(app.Environment.ContentRootPath, "appsettings.json");
+void SaveConfig(string t, string c, string s)
+{
+    tenantId = t; clientId = c; clientSecret = s;
+    credential = null; graph = null;
+    var json = System.Text.Json.JsonSerializer.Serialize(new
+    {
+        Graph = new { TenantId = t, ClientId = c, ClientSecret = s },
+        Logging = new { LogLevel = new Dictionary<string, string> { ["Default"] = "Warning", ["Microsoft.AspNetCore"] = "Warning" } }
+    }, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+    File.WriteAllText(appsettingsPath, json);
+}
+
+// ---- Multi-tenant profiles (saved to tenants.json next to the app) -----------
+var tenantsPath = Path.Combine(app.Environment.ContentRootPath, "tenants.json");
+var tenantJsonOpts = new System.Text.Json.JsonSerializerOptions { WriteIndented = true };
+var tenants = new List<TenantProfile>();
+string? activeTenantId = null;
+void SaveTenants() => File.WriteAllText(tenantsPath,
+    System.Text.Json.JsonSerializer.Serialize(new TenantStore(activeTenantId, tenants), tenantJsonOpts));
+void ApplyActive()
+{
+    var p = tenants.FirstOrDefault(t => t.Id == activeTenantId);
+    if (p is not null) { tenantId = p.TenantId; clientId = p.ClientId; clientSecret = p.ClientSecret; }
+    else { tenantId = clientId = clientSecret = null; }
+    credential = null; graph = null;
+}
+void LoadTenants()
+{
+    if (File.Exists(tenantsPath))
+    {
+        try
+        {
+            var store = System.Text.Json.JsonSerializer.Deserialize<TenantStore>(File.ReadAllText(tenantsPath));
+            if (store is not null) { tenants = store.Tenants ?? new(); activeTenantId = store.ActiveId; }
+        }
+        catch { /* corrupt file: fall back to appsettings seed below */ }
+    }
+    // First run with only appsettings.json filled in: seed a profile from it.
+    if (tenants.Count == 0 && Configured())
+    {
+        var seed = new TenantProfile(Guid.NewGuid().ToString("N"), "My tenant", tenantId!, clientId!, clientSecret!);
+        tenants.Add(seed); activeTenantId = seed.Id; SaveTenants();
+    }
+    if (activeTenantId is null && tenants.Count > 0) activeTenantId = tenants[0].Id;
+    if (tenants.Count > 0) ApplyActive();
+}
+LoadTenants();
+
+// ---- Daily metric snapshots (local history that powers trend deltas) --------
+var snapshotsPath = Path.Combine(app.Environment.ContentRootPath, "snapshots.json");
+var snaps = new Dictionary<string, List<Snapshot>>();
+void LoadSnaps()
+{
+    if (File.Exists(snapshotsPath))
+    {
+        try { snaps = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, List<Snapshot>>>(File.ReadAllText(snapshotsPath)) ?? new(); }
+        catch { snaps = new(); }
+    }
+}
+void SaveSnaps() => File.WriteAllText(snapshotsPath, System.Text.Json.JsonSerializer.Serialize(snaps, tenantJsonOpts));
+LoadSnaps();
+
+// ---- Config + permission validation -----------------------------------------
+app.MapGet("/api/config", () => Results.Json(new
+{
+    configured = Configured(),
+    tenantId = NotConfigured(tenantId) ? "" : tenantId,
+    clientId = NotConfigured(clientId) ? "" : clientId,
+    hasSecret = !NotConfigured(clientSecret)
+}));
+
+app.MapPost("/api/config", async (ConfigDto body) =>
+{
+    // blank secret means "keep the existing one"
+    var secret = (body is null || string.IsNullOrWhiteSpace(body.clientSecret)) ? clientSecret : body.clientSecret.Trim();
+    if (body is null || string.IsNullOrWhiteSpace(body.tenantId) || string.IsNullOrWhiteSpace(body.clientId) || NotConfigured(secret))
+        return Results.Json(new { ok = false, message = "Tenant ID, Client ID and Client Secret are all required." });
+    SaveConfig(body.tenantId.Trim(), body.clientId.Trim(), secret);
+    try
+    {
+        await Cred().GetTokenAsync(new TokenRequestContext(new[] { "https://graph.microsoft.com/.default" }));
+        return Results.Json(new { ok = true, message = "Connected. Live data will load." });
+    }
+    catch (Exception ex) { return Results.Json(new { ok = false, message = Describe(ex) }); }
+});
+
+// ---- Multi-tenant: list / add-or-update / switch / delete --------------------
+app.MapGet("/api/tenants", () => Results.Json(new
+{
+    activeId = activeTenantId,
+    tenants = tenants.Select(t => new
+    {
+        id = t.Id,
+        label = t.Label,
+        tenantId = t.TenantId,
+        clientId = t.ClientId,
+        hasSecret = !NotConfigured(t.ClientSecret),
+        active = t.Id == activeTenantId
+    })
+}));
+
+app.MapPost("/api/tenants", async (TenantDto body) =>
+{
+    if (body is null || string.IsNullOrWhiteSpace(body.tenantId) || string.IsNullOrWhiteSpace(body.clientId))
+        return Results.Json(new { ok = false, message = "Tenant ID and Client ID are required." });
+    var existing = tenants.FirstOrDefault(t => t.Id == body.id);
+    // blank secret on an existing tenant means "keep the saved one"
+    var secret = string.IsNullOrWhiteSpace(body.clientSecret) ? (existing?.ClientSecret ?? "") : body.clientSecret.Trim();
+    if (NotConfigured(secret))
+        return Results.Json(new { ok = false, message = "Client Secret is required." });
+    var label = string.IsNullOrWhiteSpace(body.label) ? body.tenantId.Trim() : body.label.Trim();
+    var profile = new TenantProfile(existing?.Id ?? Guid.NewGuid().ToString("N"), label, body.tenantId.Trim(), body.clientId.Trim(), secret);
+    if (existing is not null) tenants[tenants.IndexOf(existing)] = profile; else tenants.Add(profile);
+    activeTenantId = profile.Id; ApplyActive(); SaveTenants();
+    try
+    {
+        await Cred().GetTokenAsync(new TokenRequestContext(new[] { "https://graph.microsoft.com/.default" }));
+        return Results.Json(new { ok = true, message = "Connected. Live data will load.", id = profile.Id });
+    }
+    catch (Exception ex) { return Results.Json(new { ok = false, message = Describe(ex), id = profile.Id }); }
+});
+
+app.MapPost("/api/tenants/{id}/activate", async (string id) =>
+{
+    var p = tenants.FirstOrDefault(t => t.Id == id);
+    if (p is null) return Results.Json(new { ok = false, message = "Tenant not found." });
+    activeTenantId = id; ApplyActive(); SaveTenants();
+    try
+    {
+        await Cred().GetTokenAsync(new TokenRequestContext(new[] { "https://graph.microsoft.com/.default" }));
+        return Results.Json(new { ok = true, message = "Switched to " + p.Label });
+    }
+    catch (Exception ex) { return Results.Json(new { ok = false, message = Describe(ex) }); }
+});
+
+app.MapDelete("/api/tenants/{id}", (string id) =>
+{
+    var p = tenants.FirstOrDefault(t => t.Id == id);
+    if (p is null) return Results.Json(new { ok = false, message = "Tenant not found." });
+    tenants.Remove(p);
+    if (activeTenantId == id) { activeTenantId = tenants.FirstOrDefault()?.Id; ApplyActive(); }
+    SaveTenants();
+    return Results.Json(new { ok = true });
+});
+
+// Record today's metrics for the active tenant (upsert one row per UTC day).
+app.MapPost("/api/snapshot", (SnapshotDto body) =>
+{
+    if (activeTenantId is null || body?.metrics is null || body.metrics.Count == 0)
+        return Results.Json(new { ok = false });
+    var today = DateTimeOffset.UtcNow.ToString("yyyy-MM-dd");
+    if (!snaps.TryGetValue(activeTenantId, out var list)) { list = new(); snaps[activeTenantId] = list; }
+    var existing = list.FirstOrDefault(s => s.date == today);
+    if (existing is not null) list[list.IndexOf(existing)] = new Snapshot(today, body.metrics);
+    else list.Add(new Snapshot(today, body.metrics));
+    if (list.Count > 400) list.RemoveRange(0, list.Count - 400);   // keep ~1 year
+    SaveSnaps();
+    return Results.Json(new { ok = true, days = list.Count });
+});
+
+// Full daily series for the active tenant (front-end computes the deltas).
+app.MapGet("/api/trends", () =>
+{
+    if (activeTenantId is null || !snaps.TryGetValue(activeTenantId, out var list) || list.Count == 0)
+        return Results.Json(new { series = Array.Empty<object>() });
+    var series = list.OrderBy(s => s.date).Select(s =>
+    {
+        var row = new Dictionary<string, object?> { ["date"] = s.date };
+        foreach (var kv in s.metrics) row[kv.Key] = kv.Value;
+        return row;
+    });
+    return Results.Json(new { series });
+});
+
+app.MapGet("/api/permissions/check", async () =>
+{
+    if (!Configured()) return Results.Json(new { error = "not_configured" });
+    try { await Cred().GetTokenAsync(new TokenRequestContext(new[] { "https://graph.microsoft.com/.default" })); }
+    catch (Exception ex) { return Results.Json(new { connected = false, message = Describe(ex) }); }
+
+    async Task<bool> Probe(Func<Task> call) { try { await call(); return true; } catch { return false; } }
+    var checks = new List<object>();
+    async Task Add(string perm, string[] tiles, Func<Task> call)
+    {
+        checks.Add(new { permission = perm, granted = await Probe(call), tiles });
+    }
+
+    await Add("Organization.Read.All", new[] { "Licenses", "Unused licenses" }, async () => await G().Organization.GetAsync());
+    await Add("User.Read.All", new[] { "Users", "Guest users" }, async () => await G().Users.GetAsync(rc => rc.QueryParameters.Top = 1));
+    await Add("Reports.Read.All", new[] { "Storage", "Sites", "Workload", "Copilot usage" }, async () => await ReportCsv("getOffice365ServicesUserCounts(period='D7')"));
+    await Add("Group.Read.All", new[] { "Governance" }, async () => await G().Groups.GetAsync(rc => rc.QueryParameters.Top = 1));
+    await Add("Directory.Read.All", new[] { "App secrets", "Admin roles" }, async () => await G().Applications.GetAsync(rc => rc.QueryParameters.Top = 1));
+    await Add("ServiceHealth.Read.All", new[] { "Service health", "Services" }, async () => await G().Admin.ServiceAnnouncement.HealthOverviews.GetAsync());
+    await Add("SecurityEvents.Read.All", new[] { "Secure Score" }, async () => await G().Security.SecureScores.GetAsync(rc => rc.QueryParameters.Top = 1));
+    return Results.Json(new { connected = true, checks });
+});
+
 // Usage reports come back as CSV, fetched with a raw token.
 async Task<string> ReportCsv(string func, string version = "v1.0")
 {
@@ -164,31 +363,38 @@ app.MapGet("/api/users", async () =>
     if (!Configured()) return Results.Json(new { error = "not_configured" });
     try
     {
+        var counts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        int total = 0, guests = 0;
+        var list = new List<object>();
         var resp = await G().Users.GetAsync(rc =>
         {
             rc.QueryParameters.Select = new[] { "displayName", "userPrincipalName", "userType", "accountEnabled" };
             rc.QueryParameters.Top = 999;
         });
-        var counts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-        int total = 0, guests = 0;
-        var list = new List<object>();
-        foreach (var u in resp?.Value ?? new())
+        int pages = 0;
+        while (resp is not null)
         {
-            total++;
-            var upn = u.UserPrincipalName ?? "";
-            var at = upn.LastIndexOf('@');
-            var dom = at >= 0 ? upn[(at + 1)..] : "(none)";
-            var isGuest = string.Equals(u.UserType, "Guest", StringComparison.OrdinalIgnoreCase);
-            if (isGuest) guests++;
-            else counts[dom] = counts.GetValueOrDefault(dom) + 1;
-            list.Add(new
+            foreach (var u in resp.Value ?? new())
             {
-                name = u.DisplayName ?? "",
-                upn,
-                type = isGuest ? "Guest" : "Member",
-                domain = dom,
-                enabled = u.AccountEnabled ?? true
-            });
+                total++;
+                var upn = u.UserPrincipalName ?? "";
+                var at = upn.LastIndexOf('@');
+                var dom = at >= 0 ? upn[(at + 1)..] : "(none)";
+                var isGuest = string.Equals(u.UserType, "Guest", StringComparison.OrdinalIgnoreCase);
+                if (isGuest) guests++;
+                else counts[dom] = counts.GetValueOrDefault(dom) + 1;
+                list.Add(new
+                {
+                    name = u.DisplayName ?? "",
+                    upn,
+                    type = isGuest ? "Guest" : "Member",
+                    domain = dom,
+                    enabled = u.AccountEnabled ?? true
+                });
+            }
+            var next = resp.OdataNextLink;
+            if (string.IsNullOrEmpty(next) || ++pages >= 200) break;  // ~200k-user safety ceiling
+            resp = await G().Users.WithUrl(next).GetAsync();
         }
         var domains = counts.OrderByDescending(kv => kv.Value).Take(6)
             .Select(kv => new { domain = kv.Key, count = kv.Value }).ToList();
@@ -461,3 +667,10 @@ static Dictionary<string, string> FriendlyNames() => new()
     ["DEVELOPERPACK_E5"] = "Microsoft 365 E5 Developer",
     ["DEVELOPERPACK"] = "Office 365 E3 Developer",
 };
+
+record ConfigDto(string tenantId, string clientId, string clientSecret);
+record TenantDto(string? id, string label, string tenantId, string clientId, string clientSecret);
+record TenantProfile(string Id, string Label, string TenantId, string ClientId, string ClientSecret);
+record TenantStore(string? ActiveId, List<TenantProfile> Tenants);
+record SnapshotDto(Dictionary<string, double?> metrics);
+record Snapshot(string date, Dictionary<string, double?> metrics);

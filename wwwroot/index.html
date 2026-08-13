@@ -19,27 +19,29 @@
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
-      --bg:#0e1320; --surface:#161c2b; --surface-2:#1c2434; --border:#28324a;
-      --text:#e7ebf4; --muted:#98a2b6; --faint:#6b768c;
-      --accent:#7684ff; --accent-soft:#212a52;
-      --good:#33c088; --good-soft:#123227;
-      --warn:#e0a53a; --warn-soft:#33290f;
-      --bad:#f06a6a; --bad-soft:#361a1c;
-      --track:#222b3d;
-      --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
-      --shadow-hi:0 2px 8px rgba(0,0,0,.4),0 16px 36px rgba(0,0,0,.35);
+      /* VS Code dark palette — matches the Microsoft Search Query Tool */
+      --bg:#1e1e1e; --surface:#252526; --surface-2:#2d2d30; --border:#3c3c3c;
+      --text:#d4d4d4; --muted:#9a9a9a; --faint:#6e7681;
+      --accent:#3794ff; --accent-soft:#14314f;
+      --good:#4ec9b0; --good-soft:#123029;
+      --warn:#d7ba7d; --warn-soft:#332c1c;
+      --bad:#f14c4c; --bad-soft:#3a1e1e;
+      --track:#333333;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 20px rgba(0,0,0,.35);
+      --shadow-hi:0 2px 8px rgba(0,0,0,.5),0 16px 36px rgba(0,0,0,.45);
     }
   }
   :root[data-theme="dark"]{
-    --bg:#0e1320; --surface:#161c2b; --surface-2:#1c2434; --border:#28324a;
-    --text:#e7ebf4; --muted:#98a2b6; --faint:#6b768c;
-    --accent:#7684ff; --accent-soft:#212a52;
-    --good:#33c088; --good-soft:#123227;
-    --warn:#e0a53a; --warn-soft:#33290f;
-    --bad:#f06a6a; --bad-soft:#361a1c;
-    --track:#222b3d;
-    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
-    --shadow-hi:0 2px 8px rgba(0,0,0,.4),0 16px 36px rgba(0,0,0,.35);
+    /* VS Code dark palette — matches the Microsoft Search Query Tool */
+    --bg:#1e1e1e; --surface:#252526; --surface-2:#2d2d30; --border:#3c3c3c;
+    --text:#d4d4d4; --muted:#9a9a9a; --faint:#6e7681;
+    --accent:#3794ff; --accent-soft:#14314f;
+    --good:#4ec9b0; --good-soft:#123029;
+    --warn:#d7ba7d; --warn-soft:#332c1c;
+    --bad:#f14c4c; --bad-soft:#3a1e1e;
+    --track:#333333;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 20px rgba(0,0,0,.35);
+    --shadow-hi:0 2px 8px rgba(0,0,0,.5),0 16px 36px rgba(0,0,0,.45);
   }
 
   *{box-sizing:border-box}
@@ -96,19 +98,34 @@
   /* flip card */
   .card{background:var(--surface); border:1px solid var(--border); border-radius:14px;
     box-shadow:var(--shadow); position:relative; perspective:1500px}
-  .card.flip{cursor:pointer; transition:box-shadow .2s, border-color .2s}
-  .card.flip:hover{box-shadow:var(--shadow-hi); border-color:var(--accent)}
-  .card.flip:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+  .card.flip{transition:box-shadow .2s, border-color .2s}
+  .card.linkable{cursor:pointer}
+  .card.linkable:hover{box-shadow:var(--shadow-hi); border-color:var(--accent)}
+  .card.linkable:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+  /* flip removed: hide the (sample) backs and flip affordance */
+  .face.back{display:none}
+  .hint{display:none}
   .flip-inner{display:grid; transform-style:preserve-3d; transition:transform .55s cubic-bezier(.2,.7,.2,1)}
   .card.flipped .flip-inner{transform:rotateY(180deg)}
   .face{grid-area:1/1; position:relative; padding:16px; min-width:0;
     -webkit-backface-visibility:hidden; backface-visibility:hidden}
   .face.back{transform:rotateY(180deg)}
 
-  .hint{position:absolute; bottom:11px; right:12px; width:22px; height:22px; border-radius:50%;
-    display:grid; place-items:center; color:var(--faint); border:1px solid var(--border); background:var(--surface); z-index:2}
-  .hint svg{width:12px; height:12px}
-  .card.flip:hover .hint{color:var(--accent); border-color:var(--accent)}
+  /* flip hint fully removed */
+
+  /* workload donut (active users by service) — wd- prefix avoids the storage-gauge .donut */
+  .wd-wrap{display:flex; align-items:center; gap:18px; margin-top:8px; flex-wrap:wrap}
+  .wd-legend{flex:1; display:flex; flex-direction:column; gap:10px; min-width:130px}
+  .wd-row{display:flex; align-items:center; gap:9px; font-size:13px}
+  .wd-dot{width:10px; height:10px; border-radius:3px; flex:none}
+  .wd-name{flex:1; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .wd-val{font-weight:600; color:var(--text)}
+  .wd-donut{position:relative; width:118px; height:118px; flex:none}
+  .wd-svg{width:118px; height:118px; display:block}
+  .wd-center{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none}
+  .wd-center b{font-size:22px; line-height:1; color:var(--text)}
+  .wd-center span{font-size:10px; color:var(--faint); margin-top:3px; letter-spacing:.3px}
+  .wd-note{font-size:11px; color:var(--faint); margin-top:14px}
 
   .kpi::before{content:""; position:absolute; left:0; top:0; bottom:0; width:4px;
     border-radius:14px 0 0 14px; background:var(--accent); z-index:1}
@@ -119,12 +136,40 @@
   .kpi .value{font-size:30px; font-weight:750; margin:6px 0 2px; letter-spacing:-.5px}
   .kpi .value small{font-size:15px; color:var(--muted); font-weight:600}
   .kpi .note{font-size:12.5px; color:var(--muted)}
+  .kpi .trend{font-size:12px; font-weight:700; margin:0 0 4px; letter-spacing:.2px}
+  .kpi .trend.good{color:var(--good)}
+  .kpi .trend.bad{color:var(--bad)}
+  .kpi .trend.neutral{color:var(--muted); font-weight:600}
+  .kpi .trend.flat{color:var(--faint); font-weight:600}
   .state{display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:700; padding:3px 9px; border-radius:999px}
   .state.good{background:var(--good-soft); color:var(--good)}
   .state.warn{background:var(--warn-soft); color:var(--warn)}
   .state.bad{background:var(--bad-soft); color:var(--bad)}
+  .state.sh-pill{max-width:118px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:inline-block; vertical-align:middle}
+  .sh-tail{color:var(--muted); font-size:12px; margin-left:7px; white-space:nowrap}
+  /* storage quota bar */
+  .qbar{height:6px; border-radius:999px; background:var(--surface-2); border:1px solid var(--border); overflow:hidden; margin:7px 0 5px}
+  .qbar span{display:block; height:100%; background:var(--accent); border-radius:999px; transition:width .4s ease}
+  .qbar span.over{background:var(--warn)}
+  .qbar span.crit{background:var(--bad)}
+  .qnote{font-size:12px; color:var(--muted)}
+  .qhint{color:var(--faint); font-style:italic}
 
   .details{grid-template-columns:repeat(12,1fr)}
+  /* group equal-height cards into the same row (visual order, markup unchanged) */
+  .od1{order:1}.od2{order:2}.od3{order:3}.od4{order:4}.od5{order:5}.od6{order:6}.od7{order:7}.od8{order:8}.od9{order:9}
+  /* drag-to-reorder detail cards */
+  .drag-handle{position:absolute; top:8px; left:8px; z-index:6; width:24px; height:24px; padding:0;
+    display:grid; place-items:center; border:none; background:transparent; color:var(--faint);
+    cursor:grab; opacity:0; transition:opacity .15s, background .15s; border-radius:6px; touch-action:none}
+  .drag-handle svg{width:16px; height:16px}
+  .details > .card:hover .drag-handle, .drag-handle:focus-visible{opacity:.7}
+  .drag-handle:hover{opacity:1; background:var(--surface-2); color:var(--muted)}
+  .drag-handle:active{cursor:grabbing}
+  @media (hover: none){ .details > .card .drag-handle{opacity:.55} }
+  .card.dragging{opacity:.4}
+  .drop-before{box-shadow:inset 4px 0 0 var(--accent)}
+  .drop-after{box-shadow:inset -4px 0 0 var(--accent)}
   .col-6{grid-column:span 6} .col-4{grid-column:span 4} .col-8{grid-column:span 8}
   @media(max-width:920px){.col-6,.col-4,.col-8{grid-column:span 12}}
   .front h3,.back h3{margin:0 0 2px; font-size:14.5px; font-weight:700; padding-right:60px}
@@ -167,8 +212,56 @@
   .foot{margin-top:22px; color:var(--faint); font-size:12px; text-align:center}
   a{color:var(--accent)}
   /* app shell */
-  .app{display:grid; grid-template-columns:210px 1fr; min-height:100vh}
-  .sidebar{background:var(--surface); border-right:1px solid var(--border); display:flex; flex-direction:column; padding:16px 12px; position:sticky; top:0; height:100vh}
+  /* M365-style suite bar */
+  .suitebar{position:sticky; top:0; z-index:30; display:flex; align-items:center; gap:12px; height:48px; padding:0 12px; background:#26262e; color:#fff}
+  .suitebar .spacer{flex:1}
+  .waffle{background:none; border:none; color:#fff; cursor:pointer; padding:6px; border-radius:6px; display:grid; place-items:center; opacity:.92}
+  .waffle:hover{background:rgba(255,255,255,.14); opacity:1}
+  .waffle svg{width:18px; height:18px}
+  .suite-name{font-size:15px; font-weight:600; letter-spacing:.1px}
+  .suite-btn{background:none; border:none; color:#fff; cursor:pointer; padding:7px; border-radius:6px; display:grid; place-items:center; opacity:.92}
+  .suite-btn:hover{background:rgba(255,255,255,.14); opacity:1}
+  .suite-btn svg{width:18px; height:18px}
+  .suite-reset{display:flex; align-items:center; gap:6px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); color:#fff; cursor:pointer; padding:6px 12px; border-radius:999px; font-size:12.5px; opacity:.95}
+  .suite-reset:hover{background:rgba(255,255,255,.16); opacity:1}
+  .suite-reset svg{width:14px; height:14px; flex:none}
+  .suite-acct{width:30px; height:30px; border-radius:50%; background:var(--accent); color:#fff; display:grid; place-items:center; font-weight:700; font-size:13px}
+  /* tenant switcher (suite bar) */
+  .tenant-switch{position:relative}
+  .tsw-btn{display:flex; align-items:center; gap:8px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); color:#fff; cursor:pointer; padding:6px 14px; border-radius:999px; font-size:13px; opacity:.95}
+  .tsw-btn:hover{background:rgba(255,255,255,.16); opacity:1}
+  .tsw-btn svg{width:15px; height:15px; flex:none}
+  .tsw-btn .tsw-chev{width:13px; height:13px; opacity:.8}
+  .tsw-status{width:8px; height:8px; border-radius:50%; background:var(--warn); flex:none; box-shadow:0 0 0 3px rgba(255,255,255,.06)}
+  .tsw-status.live{background:var(--good)}
+  #tswLabel{white-space:nowrap; font-weight:600}
+  .tsw-menu{position:absolute; right:0; top:40px; min-width:250px; background:var(--surface); color:var(--text); border:1px solid var(--border); border-radius:10px; box-shadow:0 12px 34px rgba(0,0,0,.28); padding:6px; z-index:40}
+  .tsw-item{display:flex; align-items:center; gap:9px; width:100%; padding:9px 10px; background:none; border:0; color:var(--text); border-radius:7px; cursor:pointer; font-size:13px; text-align:left}
+  .tsw-item:hover{background:var(--surface-2)}
+  .tsw-item.active{font-weight:600}
+  .tsw-dot{width:7px; height:7px; border-radius:50%; background:var(--border); flex:none}
+  .tsw-item.active .tsw-dot{background:var(--good)}
+  .tsw-name{flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .tsw-cur{font-size:11px; color:var(--faint)}
+  .tsw-sep{height:1px; background:var(--border); margin:6px 4px}
+  .tsw-add{color:var(--accent)}
+  .tsw-plus{font-weight:700; font-size:15px; width:7px; text-align:center}
+  /* tenant manager (settings) */
+  .tenant-list{display:flex; flex-direction:column; gap:8px; margin-bottom:18px}
+  .tl-row{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 12px; border:1px solid var(--border); border-radius:9px}
+  .tl-row.active{border-color:var(--accent); background:var(--surface-2)}
+  .tl-label{font-weight:600; font-size:13.5px}
+  .tl-badge{font-size:10px; color:var(--good); border:1px solid var(--good); border-radius:5px; padding:1px 5px; margin-left:6px; text-transform:uppercase; letter-spacing:.4px; font-weight:600}
+  .tl-sub{font-size:11.5px; color:var(--faint); font-family:ui-monospace,monospace; margin-top:2px; word-break:break-all}
+  .tl-actions{display:flex; gap:6px; flex:none}
+  .btn.sm{padding:5px 10px; font-size:12px}
+  .btn.danger{color:var(--bad); border-color:var(--bad)}
+  .btn.danger:hover{background:var(--bad-soft)}
+  .tl-empty{color:var(--muted); font-size:13px; padding:8px 0}
+  .conn-sub{font-size:12.5px; margin:2px 0 10px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.4px}
+
+  .app{display:grid; grid-template-columns:210px 1fr; min-height:calc(100vh - 48px)}
+  .sidebar{background:var(--surface); border-right:1px solid var(--border); display:flex; flex-direction:column; padding:16px 12px; position:sticky; top:48px; height:calc(100vh - 48px)}
   .side-top{display:flex; align-items:center; justify-content:space-between; margin:2px 4px 18px}
   .side-logo{width:38px; height:38px; border-radius:10px; background:linear-gradient(135deg,var(--accent),#22b8c4); display:grid; place-items:center; color:#fff; font-weight:800; font-size:14px; flex:none}
   .side-burger{background:none; border:none; color:var(--muted); cursor:pointer; padding:6px; border-radius:8px; display:grid; place-items:center}
@@ -189,10 +282,36 @@
   .app.collapsed .nav-item, .app.collapsed .side-foot{justify-content:center; padding:9px}
   .app.collapsed .side-logo{display:none}
   .app.collapsed .side-top{justify-content:center; margin-left:0; margin-right:0}
-  .main{min-width:0; padding:18px 24px 48px}
-  .topbar{display:flex; align-items:center; gap:14px; margin-bottom:16px; flex-wrap:wrap}
+  .main{min-width:0; padding:22px 28px 48px}
+  /* help modal */
+  .modal-overlay{position:fixed; inset:0; z-index:60; background:rgba(0,0,0,.5); display:flex; align-items:flex-start; justify-content:center; padding:6vh 16px; overflow-y:auto}
+  .modal-overlay[hidden]{display:none}
+  .modal{background:var(--surface); color:var(--text); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow-hi); max-width:660px; width:100%; max-height:88vh; display:flex; flex-direction:column}
+  .modal-head{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 20px; border-bottom:1px solid var(--border)}
+  .modal-head h2{margin:0; font-size:17px}
+  .modal-x{border:none; background:none; color:var(--muted); font-size:24px; line-height:1; cursor:pointer; padding:2px 8px; border-radius:6px}
+  .modal-x:hover{background:var(--surface-2); color:var(--text)}
+  .modal-body{padding:18px 22px; overflow-y:auto; font-size:13.5px; line-height:1.55}
+  .modal-body h3{margin:20px 0 6px; font-size:14px}
+  .modal-body p{margin:0 0 10px; color:var(--muted)}
+  .modal-body b{color:var(--text)}
+  .modal-body code{background:var(--surface-2); border:1px solid var(--border); border-radius:5px; padding:1px 5px; font-size:12px; color:var(--text)}
+  .modal-body ol.help-steps{margin:0 0 8px; padding-left:20px}
+  .modal-body ol.help-steps>li{margin:0 0 12px; color:var(--muted)}
+  .modal-body ul{margin:6px 0; padding-left:18px}
+  .modal-body ul li{margin:2px 0; color:var(--muted)}
+  .modal.modal-sm{max-width:460px}
+  .fb-form{display:flex; flex-direction:column; gap:12px; margin-top:6px}
+  .fb-form label{display:flex; flex-direction:column; gap:5px; font-size:13px; color:var(--muted)}
+  .fb-form input[type=text], .fb-form input[type=email], .fb-form textarea{padding:8px 10px; border:1px solid var(--border); border-radius:8px; background:var(--surface-2); color:var(--text); font-size:13px; font-family:inherit}
+  .fb-form textarea{resize:vertical}
+  .fb-form input:focus, .fb-form textarea:focus{outline:2px solid var(--accent); outline-offset:1px; border-color:transparent}
+  .fb-check{flex-direction:row !important; align-items:center; gap:8px; cursor:pointer}
+  .fb-check input{width:16px; height:16px}
+  .fb-actions{display:flex; align-items:center; gap:12px; margin-top:2px}
+  .topbar{position:sticky; top:48px; z-index:15; background:var(--bg); display:flex; align-items:center; gap:14px; margin:0 -28px 20px; padding:14px 28px; border-bottom:1px solid var(--border)}
   .topbar h1{margin:0; font-size:18px; font-weight:700}
-  .topbar .sub{margin:0; color:var(--muted); font-size:12px}
+  .topbar .sub{margin:0; color:var(--text); font-size:14px; font-weight:600}
   .page{max-width:1240px}
   .page[hidden]{display:none}
   .stub{background:var(--surface); border:1px dashed var(--border); border-radius:14px; padding:44px; text-align:center; color:var(--muted); font-size:14px; max-width:640px}
@@ -206,6 +325,16 @@
   .btn.primary{background:var(--accent); color:#fff; border-color:var(--accent)}
   .btn.primary:hover{filter:brightness(1.06); color:#fff}
   .save-msg{font-size:12px; color:var(--good); font-weight:600}
+  .conn-rows{display:flex; flex-direction:column; gap:10px; margin:10px 0 14px; max-width:520px}
+  .conn-rows label{display:flex; flex-direction:column; gap:4px; font-size:12.5px; color:var(--muted)}
+  .conn-rows input{padding:8px 10px; border:1px solid var(--border); border-radius:8px; background:var(--surface-2); color:var(--text); font-size:13px}
+  .perm-result{margin-top:14px; display:flex; flex-direction:column; gap:7px}
+  .perm-row{display:flex; align-items:center; gap:10px; font-size:13px}
+  .perm-row .pi{width:18px; height:18px; flex:none; display:grid; place-items:center; border-radius:50%; font-size:11px; font-weight:800}
+  .perm-row .pi.ok{background:var(--good-soft); color:var(--good)}
+  .perm-row .pi.no{background:var(--bad-soft); color:var(--bad)}
+  .perm-row .pperm{font-weight:600}
+  .perm-row .ptiles{color:var(--faint); font-size:12px}
   /* kpi tile icons */
   .kpi .face.front{padding-left:66px}
   .kpi-icon{position:absolute; top:16px; left:16px; width:40px; height:40px; border-radius:11px; display:grid; place-items:center; background:var(--accent-soft); color:var(--accent)}
@@ -224,18 +353,56 @@
   .listtable td{padding:9px 8px; border-bottom:1px solid var(--border)}
   .listtable tbody tr:hover td{background:var(--surface-2)}
   .listtable a{color:var(--accent); text-decoration:none}
+  .listpager{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:12px 8px 2px; font-size:12.5px; color:var(--muted)}
+  .listpager:empty{display:none}
+  .listpager .pgctrl{display:flex; align-items:center; gap:8px}
+  .listpager .pgnum{color:var(--faint); min-width:96px; text-align:center}
+  .listpager button[disabled]{opacity:.45; cursor:default; pointer-events:none}
   .card-link{display:inline-flex; align-items:center; gap:5px; margin-top:12px; font-size:12.5px; font-weight:600; color:var(--accent); cursor:pointer}
   .card-link:hover{gap:8px}
-  @media(max-width:820px){ .app{grid-template-columns:1fr} .sidebar{position:static; height:auto; flex-direction:row; flex-wrap:wrap; align-items:center} .nav{flex-direction:row; flex-wrap:wrap} .side-logo{margin:0 8px 0 0} .side-foot{margin:0 0 0 auto} }
+  @media(max-width:820px){
+    .app, .app.collapsed{grid-template-columns:1fr}
+    .sidebar, .app.collapsed .sidebar{position:static; height:auto; flex-direction:row; align-items:center;
+      padding:6px 8px; border-right:none; border-bottom:1px solid var(--border); overflow-x:auto}
+    .nav, .app.collapsed .nav{flex-direction:row; gap:4px; flex-wrap:nowrap; width:100%}
+    .nav-item, .app.collapsed .nav-item{white-space:nowrap; padding:8px 12px; justify-content:flex-start}
+    .app.collapsed .nav-item span{display:inline}
+    .side-bottom{display:none}
+    .main{padding:16px 14px 40px}
+    .topbar{position:static; margin:0 0 14px; padding:12px 0; flex-wrap:wrap}
+    .listhead{flex-wrap:wrap}
+    #listSearch{margin-left:0; width:100%; min-width:0}
+    .settings-card{max-width:none}
+  }
+  @media(max-width:520px){
+    .suitebar{padding:0 8px; gap:8px}
+    .suite-name{font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+    .topbar .sub{font-size:13px}
+    .kpi .value{font-size:26px}
+    .barrow{grid-template-columns:100px 1fr 46px}
+  }
 </style>
 </head>
 <body>
+<div class="suitebar">
+  <button class="waffle" id="waffleBtn" title="Menu" aria-label="Toggle menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+  <span class="suite-name">M365 Metrics Monitor</span>
+  <div class="spacer"></div>
+  <button class="suite-reset" id="resetLayout" title="Restore the default card arrangement" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Reset layout</button>
+  <button class="suite-btn" id="helpBtn" title="Help &amp; setup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 2.5"/><path d="M12 17h.01"/></svg></button>
+  <button class="suite-btn" id="theme" title="Toggle theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1.4 1.4M17.6 17.6 19 19M19 5l-1.4 1.4M6.4 17.6 5 19"/></svg></button>
+  <button class="suite-btn" id="refresh" title="Refresh data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg></button>
+  <div class="tenant-switch" id="tenantSwitch">
+    <button class="tsw-btn" id="tswBtn" title="Switch tenant">
+      <span class="tsw-status" id="tswStatus" title="Data status"></span>
+      <span id="tswLabel">Tenant</span>
+      <svg class="tsw-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div class="tsw-menu" id="tswMenu" hidden></div>
+  </div>
+</div>
 <div class="app">
   <aside class="sidebar">
-    <div class="side-top">
-      <div class="side-logo">M365</div>
-      <button class="side-burger" id="collapseBtn" title="Collapse sidebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
-    </div>
     <nav class="nav">
       <a class="nav-item active" data-page="overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg><span>Overview</span></a>
       <a class="nav-item" data-page="services"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="7" rx="1.5"/><rect x="3" y="13" width="18" height="7" rx="1.5"/><path d="M7 7.5h.01M7 16.5h.01"/></svg><span>Services</span></a>
@@ -251,39 +418,7 @@
   </aside>
 
   <main class="main">
-    <header class="topbar">
-      <div class="ttl">
-        <h1>M365 Metrics Monitor</h1>
-        <p class="sub">contoso.onmicrosoft.com</p>
-      </div>
-      <div class="spacer"></div>
-      <span class="badge-proto">SAMPLE</span>
-      <span class="chip" id="refreshed">Refreshed just now</span>
-      <button class="btn" id="refresh">Refresh</button>
-      <button class="btn" id="theme">Theme</button>
-    </header>
-
     <section class="page" id="page-overview">
-
-  <div class="legendbar">
-    <span class="li"><span class="fresh live static"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>LIVE</span> current as of the last refresh</span>
-    <span class="li"><span class="fresh delayed static"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>~2D</span> reported, 1 to 2 days behind</span>
-    <span class="li"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--faint)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg> click a tile to flip</span>
-  </div>
-
-  <div class="health">
-    <div class="ring">&#10003;</div>
-    <div>
-      <div class="h-main">All Microsoft 365 services healthy</div>
-      <div class="h-sub">34 services reporting normal &middot; last checked 2 minutes ago</div>
-    </div>
-    <div class="spacer"></div>
-    <div class="pills">
-      <span class="hpill warn">1 advisory &middot; Exchange</span>
-      <span class="hpill info">3 message center updates</span>
-    </div>
-    <span class="fresh live"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>LIVE</span>
-  </div>
 
   <!-- KPI cards -->
   <div class="grid kpis">
@@ -449,7 +584,7 @@
   <!-- detail cards -->
   <div class="grid details">
 
-    <div class="card flip col-4" tabindex="0" role="button" aria-label="Users by domain, flip for detail">
+    <div class="card flip col-6 od4" tabindex="0" role="button" aria-label="Users by domain, flip for detail">
       <div class="flip-inner">
         <div class="face front">
           <span class="fresh live"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>LIVE</span>
@@ -474,7 +609,7 @@
       </div>
     </div>
 
-    <div class="card flip col-4" tabindex="0" role="button" aria-label="Sites by template, flip for detail">
+    <div class="card flip col-6 od7" tabindex="0" role="button" aria-label="Sites by template, flip for detail">
       <div class="flip-inner">
         <div class="face front">
           <span class="fresh delayed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>~2D</span>
@@ -499,7 +634,7 @@
       </div>
     </div>
 
-    <div class="card flip col-4" tabindex="0" role="button" aria-label="Tenant storage, flip for detail">
+    <div class="card flip col-4 od1" tabindex="0" role="button" aria-label="Tenant storage, flip for detail">
       <div class="flip-inner">
         <div class="face front">
           <span class="fresh delayed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>~2D</span>
@@ -529,7 +664,7 @@
       </div>
     </div>
 
-    <div class="card flip col-8" tabindex="0" role="button" aria-label="Top sites by storage, flip for detail">
+    <div class="card flip col-6 od8" tabindex="0" role="button" aria-label="Top sites by storage, flip for detail">
       <div class="flip-inner">
         <div class="face front">
           <span class="fresh delayed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>~2D</span>
@@ -557,7 +692,7 @@
       </div>
     </div>
 
-    <div class="card flip col-4" tabindex="0" role="button" aria-label="Licenses, flip for detail">
+    <div class="card flip col-6 od5" tabindex="0" role="button" aria-label="Licenses, flip for detail">
       <div class="flip-inner">
         <div class="face front">
           <span class="fresh live"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>LIVE</span>
@@ -584,7 +719,7 @@
       </div>
     </div>
 
-    <div class="card flip col-6" tabindex="0" role="button" aria-label="App secrets expiring, flip for detail">
+    <div class="card flip col-6 od6" tabindex="0" role="button" aria-label="App secrets expiring, flip for detail">
       <div class="flip-inner">
         <div class="face front">
           <span class="fresh live"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>LIVE</span>
@@ -611,19 +746,17 @@
       </div>
     </div>
 
-    <div class="card flip col-6" tabindex="0" role="button" aria-label="Workload activity, flip for detail">
+    <div class="card flip col-4 wd-card od2" tabindex="0" role="button" aria-label="Workload activity, flip for detail">
       <div class="flip-inner">
         <div class="face front">
           <span class="fresh delayed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>~2D</span>
           <h3>Workload activity</h3>
           <p class="cap">Active users, last 28 days</p>
-          <div class="bars">
-            <div class="barrow"><span class="name">Teams</span><span class="track"><span class="fill" data-w="94"></span></span><span class="val tnum">1,820</span></div>
-            <div class="barrow"><span class="name">SharePoint</span><span class="track"><span class="fill" data-w="82"></span></span><span class="val tnum">1,588</span></div>
-            <div class="barrow"><span class="name">Exchange</span><span class="track"><span class="fill" data-w="97"></span></span><span class="val tnum">1,881</span></div>
-            <div class="barrow"><span class="name">OneDrive</span><span class="track"><span class="fill" data-w="71"></span></span><span class="val tnum">1,372</span></div>
-            <div class="barrow"><span class="name">Copilot</span><span class="track"><span class="fill" data-w="8"></span></span><span class="val tnum">160</span></div>
+          <div class="wd-wrap">
+            <div class="wd-legend"></div>
+            <div class="wd-donut"></div>
           </div>
+          <p class="wd-note">Counted per service &mdash; a person active in several counts in each.</p>
           <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
         </div>
         <div class="face back">
@@ -637,7 +770,7 @@
       </div>
     </div>
 
-    <div class="card flip col-6" tabindex="0" role="button" aria-label="Governance watch, flip for detail">
+    <div class="card flip col-6 od9" tabindex="0" role="button" aria-label="Governance watch, flip for detail">
       <div class="flip-inner">
         <div class="face front">
           <span class="fresh live"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>LIVE</span>
@@ -664,7 +797,7 @@
       </div>
     </div>
 
-    <div class="card flip col-6" tabindex="0" role="button" aria-label="Security posture, flip for detail">
+    <div class="card flip col-4 od3" tabindex="0" role="button" aria-label="Security posture, flip for detail">
       <div class="flip-inner">
         <div class="face front">
           <span class="fresh delayed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>~2D</span>
@@ -697,11 +830,31 @@
   </div>
 
   <p class="foot">
-    Scaffold with mostly live tenant data. Click a tile to flip it for the breakdown and one action.
+    Local, read-only Microsoft 365 monitor. Click a tile or a "View all" link to open its full list.
   </p>
     </section>
 
     <section class="page" id="page-settings" hidden>
+      <div class="card settings-card">
+        <h3>Tenants</h3>
+        <p class="cap">Save one or more tenant connections (Entra app registrations) and switch between them from the top bar. Values are saved to a local file on this machine.</p>
+        <div id="tenantList" class="tenant-list"></div>
+        <h4 class="conn-sub" id="cfgFormTitle">Add a tenant</h4>
+        <div class="conn-rows">
+          <input type="hidden" id="cfgId">
+          <label>Label <input id="cfgLabel" placeholder="e.g. Contoso Production"></label>
+          <label>Tenant ID <input id="cfgTenant" placeholder="Directory (tenant) ID"></label>
+          <label>Client ID <input id="cfgClient" placeholder="Application (client) ID"></label>
+          <label>Client Secret <input id="cfgSecret" type="password" placeholder="Client secret value"></label>
+        </div>
+        <div class="settings-actions">
+          <button class="btn primary" id="saveConfig">Save &amp; connect</button>
+          <button class="btn" id="cfgReset">New</button>
+          <button class="btn" id="checkPerms">Check permissions</button>
+          <span id="cfgMsg" class="save-msg"></span>
+        </div>
+        <div id="permResult" class="perm-result"></div>
+      </div>
       <div class="card settings-card">
         <h3>License cost rates</h3>
         <p class="cap">Microsoft Graph does not expose prices. Enter your monthly cost per licence and the Unused Licenses tile shows real idle spend. Stored in this browser.</p>
@@ -716,6 +869,7 @@
         <p class="cap">Stored locally, used to highlight tiles.</p>
         <div class="thr-rows">
           <label>Warn when a secret expires within <input type="number" id="thrSecretDays" min="1" value="30"> days</label>
+          <label>Total SharePoint storage quota <input type="number" id="thrQuotaGb" min="1" step="1" placeholder="e.g. 1024"> GB <span class="cap" style="margin:0">(Graph can't read this &mdash; find it in SharePoint admin center)</span></label>
           <label>Warn when storage is over <input type="number" id="thrStoragePct" min="1" max="100" value="80"> % of quota</label>
         </div>
         <div class="settings-actions">
@@ -730,29 +884,124 @@
         <button class="btn" id="listBack">&larr; Overview</button>
         <h2 id="listTitle">List</h2>
         <input id="listSearch" placeholder="Filter...">
+        <button class="btn" id="listExport" title="Download the filtered rows as a CSV (opens in Excel)">Export CSV</button>
       </div>
-      <div class="card"><div class="listwrap"><table class="listtable"><thead id="listHead"></thead><tbody id="listBody"></tbody></table></div></div>
+      <div class="card">
+        <div class="listwrap"><table class="listtable"><thead id="listHead"></thead><tbody id="listBody"></tbody></table></div>
+        <div class="listpager" id="listPager"></div>
+      </div>
     </section>
 
   </main>
 </div>
 
+<div class="modal-overlay" id="helpOverlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Help and setup">
+    <div class="modal-head">
+      <h2>How this app works</h2>
+      <button class="modal-x" id="helpClose" title="Close" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p><b>M365 Metrics Monitor</b> is a free, local, read-only dashboard. It runs on your own PC, hosts a small web server on <code>localhost</code>, and reads your Microsoft 365 tenant through Microsoft Graph. Nothing leaves the machine except the read-only Graph calls, and there is no account or sign-up. It only ever <b>reads</b> &mdash; to change anything you still use the Microsoft admin center.</p>
+
+      <h3>First-time setup</h3>
+      <p>Auth is <b>app-only</b> (client credentials): no user sign-in, no redirect URI. You register one app in Entra and paste three values into this tool.</p>
+      <ol class="help-steps">
+        <li><b>Register an app.</b> Entra admin center &rarr; <i>App registrations</i> &rarr; <i>New registration</i>. Name it (e.g. &ldquo;M365 Metrics Monitor&rdquo;), single tenant, no redirect URI.</li>
+        <li><b>Add API permissions.</b> Under <i>API permissions</i>, add these <b>Application</b> Microsoft Graph permissions, then <b>Grant admin consent</b>:
+          <ul>
+            <li><code>Organization.Read.All</code> &mdash; licences</li>
+            <li><code>User.Read.All</code> &mdash; users, guests</li>
+            <li><code>Reports.Read.All</code> &mdash; storage, workload, Copilot usage</li>
+            <li><code>Group.Read.All</code> &mdash; governance groups</li>
+            <li><code>Directory.Read.All</code> &mdash; app secrets, admin roles</li>
+            <li><code>ServiceHealth.Read.All</code> &mdash; service health, message center</li>
+            <li><code>SecurityEvents.Read.All</code> &mdash; Secure Score</li>
+          </ul>
+        </li>
+        <li><b>Create a client secret.</b> <i>Certificates &amp; secrets</i> &rarr; <i>New client secret</i>. Copy the secret <b>Value</b> immediately &mdash; it is shown only once.</li>
+        <li><b>Enter it here.</b> Open <b>Settings &rarr; Tenants</b> and fill in:
+          <ul>
+            <li><b>Label</b> &mdash; a friendly name (e.g. &ldquo;Contoso Production&rdquo;)</li>
+            <li><b>Tenant ID</b> &mdash; Directory (tenant) ID</li>
+            <li><b>Client ID</b> &mdash; Application (client) ID</li>
+            <li><b>Client Secret</b> &mdash; the value you copied</li>
+          </ul>
+          Click <b>Save &amp; connect</b>. The status dot on the tenant pill turns green when live.
+        </li>
+        <li><b>Verify.</b> Use <b>Check permissions</b> in Settings to confirm every scope is granted &mdash; it flags which tiles won&rsquo;t work if any is missing.</li>
+      </ol>
+
+      <h3>More than one tenant</h3>
+      <p>Add more tenants in <b>Settings &rarr; Tenants</b>, then switch between them from the <b>tenant pill</b> at the top right. Each tenant keeps its own layout and trend history.</p>
+
+      <h3>Reading the tiles</h3>
+      <p>Tiles marked <b>LIVE</b> are current directory data; <b>~2D</b> comes from usage reports, about one to two days behind. <b>Trend arrows</b> (&#9650;/&#9660;) under a number appear once the tool has data from more than one day &mdash; green means the metric improved, red means it got worse.</p>
+
+      <h3>Rearranging &amp; secrets</h3>
+      <p>On the Overview, hover a card and drag its top-left handle to rearrange; a <b>Reset layout</b> button appears in the top bar once you&rsquo;ve changed the order. Your client secret is stored only on this machine and is never displayed back or sent anywhere but Microsoft Graph.</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="fbOverlay" hidden>
+  <div class="modal modal-sm" role="dialog" aria-modal="true" aria-label="Send feedback">
+    <div class="modal-head">
+      <h2>Send feedback</h2>
+      <button class="modal-x" id="fbClose" title="Close" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p>Found a bug or have an idea? This goes straight to the developer. Nothing about your tenant is included &mdash; only what you type.</p>
+      <form id="fbForm" class="fb-form" autocomplete="off">
+        <label>Name <input type="text" id="fbName" required></label>
+        <label>Email <input type="email" id="fbEmail" required></label>
+        <label>Role / company <input type="text" id="fbRole" placeholder="optional"></label>
+        <label>Message <textarea id="fbMsg" rows="4" required></textarea></label>
+        <label class="fb-check"><input type="checkbox" id="fbConsent"> You may share my feedback publicly as a testimonial</label>
+        <input type="text" id="fbBot" tabindex="-1" autocomplete="off" style="display:none">
+        <div class="fb-actions">
+          <button type="submit" class="btn primary" id="fbSubmit">Send</button>
+          <span id="fbStatus" class="save-msg"></span>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <script>
   const root = document.documentElement;
+  try{ const st = localStorage.getItem('m365mon.theme'); if(st === 'dark' || st === 'light') root.setAttribute('data-theme', st); }catch{}
   document.getElementById('theme').addEventListener('click', ()=>{
     const now = root.getAttribute('data-theme');
     const next = now === 'dark' ? 'light' : (now === 'light' ? 'dark'
                  : (matchMedia('(prefers-color-scheme: dark)').matches ? 'light' : 'dark'));
     root.setAttribute('data-theme', next);
+    try{ localStorage.setItem('m365mon.theme', next); }catch{}
   });
 
-  // click / keyboard to flip
-  document.querySelectorAll('.card.flip').forEach(card=>{
-    card.addEventListener('click', ()=> card.classList.toggle('flipped'));
-    card.addEventListener('keydown', e=>{
-      if(e.key==='Enter' || e.key===' '){ e.preventDefault(); card.classList.toggle('flipped'); }
+  // flip removed: a tile now opens its "view all" list (where one exists)
+  const TILE_AREA = {
+    'Service health':'services', 'Unused licenses':'licenses', 'Guest users':'users',
+    'Storage used':'storage', 'Secrets expiring ≤ 30d':'secrets',
+    'Users by domain':'users', 'Sites by template':'storage', 'Top sites by storage':'storage',
+    'Licenses':'licenses', 'App secrets & certificates expiring':'secrets', 'Tenant storage':'storage'
+  };
+  function wireTileLinks(){
+    document.querySelectorAll('.card.flip').forEach(card=>{
+      if(card.dataset.wired) return;
+      const label = card.querySelector('.label');
+      const h3 = card.querySelector('h3');
+      const key = label ? label.textContent.trim() : (h3 ? h3.textContent.trim() : '');
+      const area = TILE_AREA[key];
+      if(!area){ card.removeAttribute('tabindex'); card.removeAttribute('role'); return; }
+      card.dataset.wired = '1';
+      card.classList.add('linkable');
+      card.setAttribute('aria-label', key + ', open the full list');
+      card.addEventListener('click', e=>{ if(!e.target.closest('a')) goToArea(area); });
+      card.addEventListener('keydown', e=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); goToArea(area); } });
     });
-  });
+  }
+  wireTileLinks();
 
   function drawBars(){
     document.querySelectorAll('.fill').forEach(f=>{
@@ -762,10 +1011,16 @@
   }
   drawBars();
   document.getElementById('refresh').addEventListener('click', ()=>{
-    document.getElementById('refreshed').textContent = 'Refreshed just now';
     drawBars();
     refreshAll();
   });
+  // help modal
+  const helpBtn = document.getElementById('helpBtn'), helpOverlay = document.getElementById('helpOverlay'), helpClose = document.getElementById('helpClose');
+  function closeHelp(){ if(helpOverlay) helpOverlay.setAttribute('hidden',''); }
+  if(helpBtn) helpBtn.addEventListener('click', ()=>{ if(helpOverlay) helpOverlay.removeAttribute('hidden'); });
+  if(helpClose) helpClose.addEventListener('click', closeHelp);
+  if(helpOverlay) helpOverlay.addEventListener('click', e=>{ if(e.target === helpOverlay) closeHelp(); });
+  document.addEventListener('keydown', e=>{ if(e.key === 'Escape'){ closeHelp(); closeFb(); } });
 
   // --- live data wiring (falls back to sample data if /api is not configured) ---
   function cardByHeading(text){
@@ -781,12 +1036,10 @@
     });
   }
   function setBadge(text, live){
-    const b = document.querySelector('.badge-proto');
-    if(!b) return;
-    b.textContent = text;
-    b.style.background = live ? 'var(--good-soft)' : 'var(--warn-soft)';
-    b.style.color = live ? 'var(--good)' : 'var(--warn)';
+    const dot = document.getElementById('tswStatus');
+    if(dot){ dot.classList.toggle('live', !!live); dot.title = text; }
   }
+  let METRICS = {};   // this refresh cycle's KPI numbers, snapshotted for trends
   function loadLive(){
     fetch('/api/licenses').then(r=>r.json()).then(d=>{
       if(d && d.error === 'not_configured'){ setBadge('SAMPLE - add IDs + secret, then restart', false); return; }
@@ -807,6 +1060,7 @@
       }
       addCardLink(card, 'View all '+d.skus.length, 'licenses');
       const totalFree = paid.reduce((a,s)=>a+Math.max(0, s.free||0), 0);
+      METRICS.unusedLicenses = totalFree;
       const kpi = kpiByLabel('Unused licenses');
       const val = kpi && kpi.querySelector('.value');
       if(val) val.textContent = totalFree.toLocaleString();
@@ -823,6 +1077,7 @@
     fetch('/api/servicehealth').then(r=>r.json()).then(d=>{
       if(!d || d.error){ if(d && d.error) console.warn('servicehealth:', d); return; }  // keep sample on error
       const n = d.issues ? d.issues.length : 0;
+      METRICS.serviceIssues = n;
       const main = document.querySelector('.health .h-main');
       const sub = document.querySelector('.health .h-sub');
       if(main) main.textContent = d.healthy ? 'All Microsoft 365 services healthy'
@@ -846,9 +1101,17 @@
         const val = kpi.querySelector('.value');
         const note = kpi.querySelector('.note');
         if(val) val.textContent = d.healthy ? 'Healthy' : (n + ' issue' + (n>1?'s':''));
-        if(note) note.innerHTML = d.healthy
-          ? '<span class="state good">&#9679; 0 incidents</span>'
-          : '<span class="state bad">&#9679; ' + n + ' active</span>';
+        if(note){
+          if(d.healthy){ note.innerHTML = '<span class="state good">&#9679; 0 incidents</span>'; }
+          else {
+            const top = (d.issues && d.issues[0]) || {};
+            const st = (top.status||'').replace(/^Service/,'').replace(/([a-z])([A-Z])/g,'$1 $2').trim() || 'Issue';
+            const svc = top.service || 'A service';
+            const tail = n>1 ? ('+'+(n-1)+' more') : st;
+            note.innerHTML = '<span class="state bad sh-pill" title="'+svc+' · '+st+'">&#9679; '+svc+'</span>'+
+              '<span class="sh-tail">'+tail+'</span>';
+          }
+        }
       }
       const pills = document.querySelector('.health .pills');
       if(pills){
@@ -872,17 +1135,29 @@
     }).join('');
   }
 
+  function shortTenantName(d){
+    const dom = (d && d.domain || '').trim();
+    if(dom){
+      const base = dom.replace(/\.onmicrosoft\.com$/i,'').split('.')[0];
+      if(base) return base.charAt(0).toUpperCase() + base.slice(1);
+    }
+    return (d && d.name || '').trim();
+  }
   function loadOrg(){
     fetch('/api/org').then(r=>r.json()).then(d=>{
       if(!d || d.error){ if(d && d.error) console.warn('org:', d); return; }
-      const sub = document.querySelector('.topbar .sub');
-      if(sub && d.domain) sub.textContent = d.domain;
+      const nm = shortTenantName(d);
+      if(nm && tenantsCache.activeId) orgNames[tenantsCache.activeId] = nm;
+      updatePill();
+      const label = document.getElementById('tswLabel');
+      if(label && nm) label.title = d.domain || d.name || nm;
     }).catch(()=>{});
   }
 
   function loadUsers(){
     fetch('/api/users').then(r=>r.json()).then(d=>{
       if(!d || d.error){ if(d && d.error) console.warn('users:', d); return; }
+      METRICS.guests = d.guests; METRICS.usersTotal = d.total;
       const card = cardByHeading('Users by domain');
       if(card){
         const cap = card.querySelector('.cap');
@@ -902,6 +1177,7 @@
   function loadSecrets(){
     fetch('/api/secrets').then(r=>r.json()).then(d=>{
       if(!d || d.error){ if(d && d.error) console.warn('secrets:', d); return; }
+      METRICS.secretsExpiring = d.expiring30;
       const card = cardByHeading('App secrets & certificates expiring');
       const tbody = card && card.querySelector('tbody');
       const soon = (d.items||[]).filter(i=> i.days <= 60).slice(0, 8);
@@ -929,6 +1205,7 @@
   function loadStorage(){
     fetch('/api/storage').then(r=>r.json()).then(d=>{
       if(!d || d.error){ if(d && d.error) console.warn('storage:', d); return; }
+      METRICS.storageGb = d.totalGB; METRICS.sitesTotal = d.totalSites;
       const disp = d.totalTB >= 1 ? (d.totalTB+' TB') : (d.totalGB+' GB');
       const tcard = cardByHeading('Sites by template');
       if(tcard){
@@ -945,17 +1222,46 @@
           '<td class="r">'+(s.last||'')+'</td></tr>').join('');
       }
       if(scard) addCardLink(scard, 'View all '+d.totalSites+' sites', 'storage');
+      // storage quota is a manual Settings value (Graph exposes no tenant quota app-only)
+      let thr = {}; try { thr = JSON.parse(localStorage.getItem('m365mon.thresholds')||'{}'); } catch {}
+      const quotaGb = parseFloat(thr.quotaGb) || 0;
+      const warnPct = parseInt(thr.storagePct) || 80;
+      const pct = quotaGb > 0 ? Math.min(100, (d.totalGB / quotaGb) * 100) : null;
+      const over = pct != null && pct >= warnPct;
+      const crit = pct != null && pct >= 100;
+      const pctLabel = p => p.toFixed(p < 10 ? 1 : 0);
+
       const kpi = kpiByLabel('Storage used');
       if(kpi){
         const val = kpi.querySelector('.value'); if(val) val.textContent = disp;
-        const note = kpi.querySelector('.note'); if(note) note.textContent = 'across '+d.totalSites.toLocaleString()+' sites';
+        const note = kpi.querySelector('.note');
+        kpi.classList.remove('warn','bad');
+        if(note){
+          if(pct != null){
+            const qDisp = quotaGb >= 1024 ? ((Math.round(quotaGb/1024*10)/10)+' TB') : (quotaGb+' GB');
+            const cls = crit ? 'crit' : (over ? 'over' : '');
+            note.innerHTML = '<div class="qbar"><span class="'+cls+'" style="width:'+Math.max(2, pct).toFixed(0)+'%"></span></div>'+
+              '<span class="qnote">'+pctLabel(pct)+'% of '+qDisp+' &middot; '+d.totalSites.toLocaleString()+' sites</span>';
+            if(over) kpi.classList.add(crit ? 'bad' : 'warn');
+          } else {
+            note.textContent = 'across '+d.totalSites.toLocaleString()+' sites';
+          }
+        }
       }
       const tenant = cardByHeading('Tenant storage');
       if(tenant){
         const legend = tenant.querySelector('.legend');
-        if(legend) legend.innerHTML = '<div><b>'+disp+'</b> used</div><div><b>'+d.totalSites.toLocaleString()+'</b> sites</div><div>SharePoint sites</div>';
+        if(legend) legend.innerHTML = '<div><b>'+disp+'</b> used</div>'+
+          (pct != null ? '<div><b>'+pctLabel(pct)+'%</b> of quota</div>' : '<div class="qhint">Set quota in Settings</div>')+
+          '<div><b>'+d.totalSites.toLocaleString()+'</b> sites</div>';
         const center = tenant.querySelector('.donut text');
         if(center) center.textContent = d.totalTB >= 1 ? (d.totalTB+'T') : (Math.round(d.totalGB)+'G');
+        const arc = tenant.querySelector('.donut circle[stroke-dasharray]');
+        if(arc){
+          const p = pct != null ? Math.round(pct) : 0;
+          arc.setAttribute('stroke-dasharray', p+' '+(100 - p));
+          arc.setAttribute('stroke', crit ? 'var(--bad)' : (over ? 'var(--warn)' : 'var(--accent)'));
+        }
       }
     }).catch(()=>{});
   }
@@ -963,6 +1269,7 @@
   function loadCopilot(){
     fetch('/api/copilot').then(r=>r.json()).then(d=>{
       if(!d || d.error){ if(d && d.error) console.warn('copilot:', d); return; }
+      METRICS.copilotActive = d.hasCopilot ? d.active : null;
       const kpi = kpiByLabel('Copilot active');
       if(!kpi) return;
       const val = kpi.querySelector('.value');
@@ -973,14 +1280,40 @@
     }).catch(()=>{});
   }
 
+  const WL_COLORS = ['#6264a7','#12a19a','#2f6fed','#e8912d','#c94f8a'];
+  function donutSvg(items, total){
+    const C = 2 * Math.PI * 48;  // r=48
+    let cum = 0;
+    const segs = items.map((it,idx)=>{
+      const frac = total > 0 ? (it.active||0)/total : 0;
+      const seg = frac * C;
+      const rot = -90 + cum * 360;
+      cum += frac;
+      if(seg <= 0) return '';
+      return '<circle cx="60" cy="60" r="48" fill="none" stroke="'+WL_COLORS[idx%WL_COLORS.length]+'" stroke-width="16" '+
+             'stroke-dasharray="'+seg.toFixed(2)+' '+(C-seg).toFixed(2)+'" transform="rotate('+rot.toFixed(2)+' 60 60)"></circle>';
+    }).join('');
+    return '<svg viewBox="0 0 120 120" class="wd-svg">'+
+      '<circle cx="60" cy="60" r="48" fill="none" stroke="var(--surface-2)" stroke-width="16"></circle>'+segs+'</svg>';
+  }
+  function renderWorkloadDonut(card, items){
+    const legend = card.querySelector('.wd-legend'), donut = card.querySelector('.wd-donut');
+    if(!legend || !donut) return;
+    const total = items.reduce((s,i)=>s+(i.active||0), 0);
+    legend.innerHTML = items.map((it,idx)=>
+      '<div class="wd-row"><span class="wd-dot" style="background:'+WL_COLORS[idx%WL_COLORS.length]+'"></span>'+
+      '<span class="wd-name">'+it.service+'</span><span class="wd-val tnum">'+(it.active||0).toLocaleString()+'</span></div>').join('');
+    donut.innerHTML = donutSvg(items, total) +
+      '<div class="wd-center"><b class="tnum">'+total.toLocaleString()+'</b><span>active &middot; 30d</span></div>';
+  }
   function loadWorkload(){
+    const sample = [{service:'Teams',active:1820},{service:'SharePoint',active:1588},{service:'Exchange',active:1881},{service:'OneDrive',active:1372}];
     fetch('/api/workload').then(r=>r.json()).then(d=>{
-      if(!d || d.error){ if(d && d.error) console.warn('workload:', d); return; }
-      const card = cardByHeading('Workload activity');
-      if(!card) return;
-      const cap = card.querySelector('.cap'); if(cap) cap.textContent = 'Active users, last 30 days';
-      const bars = card.querySelector('.bars'); if(bars) bars.innerHTML = barsHtml(d.items, 'service', 'active');
-    }).catch(()=>{});
+      const card = cardByHeading('Workload activity'); if(!card) return;
+      if(!d || d.error){ if(d && d.error) console.warn('workload:', d); renderWorkloadDonut(card, sample); return; }
+      const cap = card.querySelector('.cap'); if(cap) cap.textContent = 'Active users by service, last 30 days';
+      renderWorkloadDonut(card, (d.items||[]).filter(i=>(i.active||0) >= 0));
+    }).catch(()=>{ const card = cardByHeading('Workload activity'); if(card) renderWorkloadDonut(card, sample); });
   }
 
   function setGovRow(card, label, value, cls){
@@ -1009,6 +1342,7 @@
   function loadSecureScore(){
     fetch('/api/securescore').then(r=>r.json()).then(d=>{
       if(!d || d.error){ if(d && d.error) console.warn('securescore:', d); return; }
+      METRICS.secureScorePct = d.pct;
       const kpi = kpiByLabel('Secure Score');
       if(kpi){
         const val = kpi.querySelector('.value'); if(val) val.textContent = d.pct + '%';
@@ -1031,7 +1365,64 @@
   }
 
   function refreshAll(){
+    METRICS = {};
     loadLive(); loadServiceHealth(); loadOrg(); loadUsers(); loadSecrets(); loadStorage(); loadCopilot(); loadWorkload(); loadGovernance(); loadSecureScore();
+    // once the live numbers have landed (or after a timeout), record today's snapshot
+    const need = ['unusedLicenses','serviceIssues','guests','secretsExpiring','storageGb','secureScorePct'];
+    let waited = 0;
+    const timer = setInterval(()=>{
+      waited += 400;
+      const have = need.filter(k => k in METRICS).length;
+      if(have >= need.length || waited >= 8000){ clearInterval(timer); postSnapshot(); }
+    }, 400);
+  }
+
+  // trend deltas: which metric feeds which KPI, and which direction is "good"
+  const TREND_TILES = {
+    serviceIssues:  { label:'Service health',            good:'down' },
+    unusedLicenses: { label:'Unused licenses',           good:'down' },
+    guests:         { label:'Guest users',               good:'neutral' },
+    storageGb:      { label:'Storage used',              good:'neutral', gb:true },
+    secretsExpiring:{ label:'Secrets expiring ≤ 30d', good:'down' },
+    copilotActive:  { label:'Copilot active',            good:'up' },
+    secureScorePct: { label:'Secure Score',              good:'up', suffix:'%' }
+  };
+  function postSnapshot(){
+    if(!Object.keys(METRICS).length){ renderTrends(); return; }  // nothing live to record
+    fetch('/api/snapshot', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ metrics: METRICS }) })
+      .then(()=> renderTrends()).catch(()=> renderTrends());
+  }
+  function renderTrends(){
+    fetch('/api/trends').then(r=>r.json()).then(d=>{
+      const series = d && d.series;
+      if(!Array.isArray(series) || series.length < 2) return;   // need a prior day to compare
+      const latest = series[series.length-1];
+      let base = null;
+      for(let i=series.length-2; i>=0; i--){ if(series[i].date !== latest.date){ base = series[i]; break; } }
+      if(!base) return;
+      Object.keys(TREND_TILES).forEach(key=>{
+        const cfg = TREND_TILES[key];
+        const kpi = kpiByLabel(cfg.label); if(!kpi) return;
+        const cur = latest[key], prev = base[key];
+        if(cur == null || prev == null) return;   // metric not tracked yet / n-a tile
+        injectTrend(kpi, cur - prev, cfg, base.date);
+      });
+    }).catch(()=>{});
+  }
+  function injectTrend(kpi, delta, cfg, sinceDate){
+    const val = kpi.querySelector('.value'); if(!val) return;
+    let el = kpi.querySelector('.trend');
+    if(!el){ el = document.createElement('div'); el.className = 'trend'; val.insertAdjacentElement('afterend', el); }
+    const d = cfg.gb ? Math.round(delta*10)/10 : Math.round(delta);
+    el.title = 'since ' + sinceDate;
+    if(d === 0){ el.className = 'trend flat'; el.innerHTML = '&#8212; no change'; return; }
+    let tone = 'neutral';
+    if(cfg.good === 'down') tone = d < 0 ? 'good' : 'bad';
+    else if(cfg.good === 'up') tone = d > 0 ? 'good' : 'bad';
+    const arrow = d > 0 ? '&#9650;' : '&#9660;';   // up / down triangle = numeric direction
+    const mag = Math.abs(d).toLocaleString() + (cfg.suffix || '');
+    el.className = 'trend ' + tone;
+    el.innerHTML = arrow + ' ' + mag;
   }
 
   // --- routing (same-tab pages; area names open the reusable list page) ---
@@ -1075,7 +1466,7 @@
       cols: [
         { label:'Service', get:i=>i.service },
         { label:'Status', get:i=> (i.status||'').replace(/^Service/,'').replace(/([a-z])([A-Z])/g,'$1 $2') || 'Operational',
-          tag:i=> i.status==='ServiceOperational' ? 'good' : 'warn' }
+          tag:i=> i.status==='ServiceOperational' ? 'good' : (/(Interruption|Incident)/i.test(i.status||'') ? 'bad' : 'warn') }
       ]
     },
     storage: {
@@ -1116,41 +1507,86 @@
       ]
     }
   };
-  let listState = { cfg:null, data:[], dir:1 };
+  const LIST_PAGE_SIZE = 50;
+  let listState = { cfg:null, data:[], dir:1, page:1, filtered:[] };
   function openList(area){
     const cfg = AREAS[area];
     document.getElementById('listTitle').textContent = cfg ? cfg.title : area;
     document.getElementById('listSearch').value = '';
-    const head = document.getElementById('listHead'), body = document.getElementById('listBody');
+    const head = document.getElementById('listHead'), body = document.getElementById('listBody'), pager = document.getElementById('listPager');
+    if(pager) pager.innerHTML = '';
     if(!cfg){ head.innerHTML=''; body.innerHTML = '<tr><td>Coming soon</td></tr>'; return; }
     body.innerHTML = '<tr><td>Loading…</td></tr>';
     fetch(cfg.endpoint).then(r=>r.json()).then(d=>{
-      listState = { cfg, data: cfg.rows(d).slice(), dir:1 };
+      listState = { cfg, data: cfg.rows(d).slice(), dir:1, page:1, filtered:[] };
       renderList();
     }).catch(()=>{ body.innerHTML = '<tr><td>Could not load</td></tr>'; });
   }
-  function renderList(){
-    const cfg = listState.cfg; if(!cfg) return;
-    const head = document.getElementById('listHead'), body = document.getElementById('listBody');
-    head.innerHTML = '<tr>'+cfg.cols.map((c,idx)=>'<th data-col="'+idx+'"'+(c.num?' class="r"':'')+'>'+c.label+'</th>').join('')+'</tr>';
+  function currentRows(){
+    const cfg = listState.cfg;
     const q = (document.getElementById('listSearch').value||'').toLowerCase();
     let rows = listState.data;
     if(q) rows = rows.filter(i=> cfg.cols.some(c=> !c.raw && String(c.get(i)).toLowerCase().includes(q)));
-    body.innerHTML = rows.length ? rows.map(i=> '<tr>'+cfg.cols.map(c=>{
+    return rows;
+  }
+  function renderList(){
+    const cfg = listState.cfg; if(!cfg) return;
+    const head = document.getElementById('listHead'), body = document.getElementById('listBody'), pager = document.getElementById('listPager');
+    head.innerHTML = '<tr>'+cfg.cols.map((c,idx)=>'<th data-col="'+idx+'"'+(c.num?' class="r"':'')+'>'+c.label+'</th>').join('')+'</tr>';
+    const rows = currentRows();
+    listState.filtered = rows;
+    const total = rows.length, ps = LIST_PAGE_SIZE, pages = Math.max(1, Math.ceil(total/ps));
+    if(listState.page > pages) listState.page = pages;
+    if(listState.page < 1) listState.page = 1;
+    const start = (listState.page-1)*ps;
+    const pageRows = rows.slice(start, start+ps);
+    body.innerHTML = pageRows.length ? pageRows.map(i=> '<tr>'+cfg.cols.map(c=>{
       const v = c.get(i);
       if(c.raw) return '<td>'+v+'</td>';
       if(c.num) return '<td class="r tnum">'+Number(v).toLocaleString()+'</td>';
       if(c.tag){ const t=c.tag(i); return '<td>'+(t?'<span class="tag '+t+'">'+v+'</span>':v)+'</td>'; }
       return '<td>'+v+'</td>';
     }).join('')+'</tr>').join('') : '<tr><td>No items</td></tr>';
+    if(pager){
+      if(total <= ps){
+        pager.innerHTML = total ? '<span>'+total+' item'+(total===1?'':'s')+'</span>' : '';
+      } else {
+        pager.innerHTML = '<span>Showing '+(start+1)+'&ndash;'+Math.min(start+ps,total)+' of '+total.toLocaleString()+'</span>'+
+          '<span class="pgctrl"><button class="btn" data-pg="prev"'+(listState.page<=1?' disabled':'')+'>&larr; Prev</button>'+
+          '<span class="pgnum">Page '+listState.page+' of '+pages+'</span>'+
+          '<button class="btn" data-pg="next"'+(listState.page>=pages?' disabled':'')+'>Next &rarr;</button></span>';
+        const prev = pager.querySelector('[data-pg=prev]'), next = pager.querySelector('[data-pg=next]');
+        if(prev) prev.addEventListener('click', ()=>{ if(listState.page>1){ listState.page--; renderList(); } });
+        if(next) next.addEventListener('click', ()=>{ if(listState.page<pages){ listState.page++; renderList(); } });
+      }
+    }
     head.querySelectorAll('th').forEach(th=> th.addEventListener('click', ()=>{
       const c = cfg.cols[+th.dataset.col]; if(c.raw) return;
       listState.data.sort((a,b)=>{ const av=c.get(a), bv=c.get(b); return (av>bv?1:av<bv?-1:0)*listState.dir; });
-      listState.dir *= -1; renderList();
+      listState.dir *= -1; listState.page = 1; renderList();
     }));
   }
   const listSearch = document.getElementById('listSearch');
-  if(listSearch) listSearch.addEventListener('input', renderList);
+  if(listSearch) listSearch.addEventListener('input', ()=>{ listState.page = 1; renderList(); });
+
+  // Export the current (filtered) list to CSV — opens in Excel. Skips unlabeled/raw columns.
+  function exportListCsv(){
+    const cfg = listState.cfg; if(!cfg) return;
+    const rows = (listState.filtered && listState.filtered.length) ? listState.filtered : currentRows();
+    const cols = cfg.cols.filter(c => c.label && !c.raw);
+    const esc = v => { let s = String(v==null?'':v).replace(/<[^>]*>/g,'').replace(/&[a-z]+;/gi,' ').replace(/\s+/g,' ').trim(); return '"'+s.replace(/"/g,'""')+'"'; };
+    const header = cols.map(c => esc(c.label)).join(',');
+    const lines = rows.map(r => cols.map(c => esc(c.get(r))).join(','));
+    const csv = [header, ...lines].join('\r\n');
+    const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = (cfg.title||'export').replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').toLowerCase()+'.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1500);
+  }
+  const listExport = document.getElementById('listExport');
+  if(listExport) listExport.addEventListener('click', exportListCsv);
 
   // adds/updates a "View all N ->" link on a card front, routing to an area
   function addCardLink(card, text, area){
@@ -1166,25 +1602,60 @@
     link.dataset.area = area;
   }
 
-  // --- feedback opens the Web3Forms browser page ---
+  // --- feedback modal (posts to Web3Forms directly — this is a browser page) ---
+  const fbOverlay = document.getElementById('fbOverlay'), fbForm = document.getElementById('fbForm');
+  function closeFb(){ if(fbOverlay) fbOverlay.setAttribute('hidden',''); }
   const fb = document.getElementById('feedbackBtn');
-  if(fb) fb.addEventListener('click', ()=>{
-    window.open('https://tools.fivenumber.com/feedback/?tool=M365%20Metrics%20Monitor&ver=0.1', '_blank');
+  if(fb) fb.addEventListener('click', ()=>{ if(fbOverlay) fbOverlay.removeAttribute('hidden'); });
+  const fbCloseBtn = document.getElementById('fbClose');
+  if(fbCloseBtn) fbCloseBtn.addEventListener('click', closeFb);
+  if(fbOverlay) fbOverlay.addEventListener('click', e=>{ if(e.target === fbOverlay) closeFb(); });
+  if(fbForm) fbForm.addEventListener('submit', e=>{
+    e.preventDefault();
+    if(document.getElementById('fbBot').value) return;   // honeypot
+    const status = document.getElementById('fbStatus'), btn = document.getElementById('fbSubmit');
+    const payload = {
+      access_key: 'ba20bdf3-788e-400e-a5b8-33d2575d127e',
+      subject: 'M365 Metrics Monitor feedback',
+      from_name: 'M365 Metrics Monitor',
+      name: document.getElementById('fbName').value.trim(),
+      email: document.getElementById('fbEmail').value.trim(),
+      role: document.getElementById('fbRole').value.trim(),
+      message: document.getElementById('fbMsg').value.trim(),
+      consent_to_share: document.getElementById('fbConsent').checked ? 'Yes' : 'No'
+    };
+    if(status){ status.style.color = 'var(--muted)'; status.textContent = 'Sending…'; }
+    if(btn) btn.disabled = true;
+    fetch('https://api.web3forms.com/submit', { method:'POST', headers:{'Content-Type':'application/json', 'Accept':'application/json'}, body: JSON.stringify(payload) })
+      .then(r=>r.json()).then(d=>{
+        if(d && d.success){
+          if(fbForm) fbForm.reset();
+          if(status){ status.style.color = 'var(--good)'; status.textContent = 'Thanks — your feedback was sent.'; }
+          setTimeout(closeFb, 1600);
+        } else if(status){ status.style.color = 'var(--bad)'; status.textContent = (d && d.message) || 'Could not send. Please try again.'; }
+      })
+      .catch(()=>{ if(status){ status.style.color = 'var(--bad)'; status.textContent = 'Could not send — check your connection.'; } })
+      .finally(()=>{ if(btn) btn.disabled = false; });
   });
 
   // --- sidebar expand/collapse (remembered) ---
   const appEl = document.querySelector('.app');
   if(appEl && localStorage.getItem('m365mon.collapsed') === '1') appEl.classList.add('collapsed');
-  const collapseBtn = document.getElementById('collapseBtn');
-  if(collapseBtn && appEl) collapseBtn.addEventListener('click', ()=>{
+  function toggleSidebar(){
+    if(!appEl) return;
     appEl.classList.toggle('collapsed');
     localStorage.setItem('m365mon.collapsed', appEl.classList.contains('collapsed') ? '1' : '0');
-  });
+  }
+  const collapseBtn = document.getElementById('collapseBtn');
+  if(collapseBtn) collapseBtn.addEventListener('click', toggleSidebar);
+  const waffleBtn = document.getElementById('waffleBtn');
+  if(waffleBtn) waffleBtn.addEventListener('click', toggleSidebar);
 
   // --- settings: cost rates + thresholds (stored in this browser) ---
   const RATES_KEY = 'm365mon.rates', THR_KEY = 'm365mon.thresholds';
   function getRates(){ try { return JSON.parse(localStorage.getItem(RATES_KEY) || '{}'); } catch { return {}; } }
   function buildSettings(){
+    loadConfig();
     fetch('/api/licenses').then(r=>r.json()).then(d=>{
       const rows = document.getElementById('rateRows');
       if(!rows || !d || !d.skus) return;
@@ -1199,6 +1670,7 @@
     try { const t = JSON.parse(localStorage.getItem(THR_KEY) || '{}');
       if(t.secretDays) document.getElementById('thrSecretDays').value = t.secretDays;
       if(t.storagePct) document.getElementById('thrStoragePct').value = t.storagePct;
+      if(t.quotaGb) document.getElementById('thrQuotaGb').value = t.quotaGb;
     } catch {}
   }
   const sr = document.getElementById('saveRates');
@@ -1211,9 +1683,132 @@
   });
   const stx = document.getElementById('saveThr');
   if(stx) stx.addEventListener('click', ()=>{
-    const t = { secretDays: parseInt(document.getElementById('thrSecretDays').value)||30, storagePct: parseInt(document.getElementById('thrStoragePct').value)||80 };
+    const t = { secretDays: parseInt(document.getElementById('thrSecretDays').value)||30, storagePct: parseInt(document.getElementById('thrStoragePct').value)||80, quotaGb: parseFloat(document.getElementById('thrQuotaGb').value)||0 };
     localStorage.setItem(THR_KEY, JSON.stringify(t));
     const m = document.getElementById('saveThrMsg'); if(m){ m.textContent = 'Saved'; setTimeout(()=>m.textContent='', 1500); }
+    loadStorage();
+  });
+
+  // --- connection config + permission check ---
+  // ---- Multi-tenant ----------------------------------------------------------
+  let tenantsCache = { activeId:null, tenants:[] };
+  let orgNames = {};   // tenantId -> friendly org name from /api/org (takes priority over the profile label)
+  function escHtml(s){ return String(s==null?'':s).replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+  function activeTenant(){ return (tenantsCache.tenants||[]).find(t=>t.id===tenantsCache.activeId) || null; }
+  function pillName(){ const id = tenantsCache.activeId, a = activeTenant(); return (id && orgNames[id]) || (a && a.label) || 'No tenant'; }
+  function updatePill(){ const l = document.getElementById('tswLabel'); if(l) l.textContent = pillName(); }
+  function loadTenants(){
+    return fetch('/api/tenants').then(r=>r.json()).then(d=>{
+      tenantsCache = d || { activeId:null, tenants:[] };
+      renderTenantSwitch(); renderTenants();
+      applyLayout();
+      return tenantsCache;
+    }).catch(()=>tenantsCache);
+  }
+  function loadConfig(){ return loadTenants(); }  // back-compat alias
+
+  function renderTenantSwitch(){
+    updatePill();
+    const menu = document.getElementById('tswMenu'); if(!menu) return;
+    const items = (tenantsCache.tenants||[]).map(t=>
+      '<button class="tsw-item'+(t.id===tenantsCache.activeId?' active':'')+'" data-id="'+t.id+'">'+
+        '<span class="tsw-dot"></span><span class="tsw-name">'+escHtml(t.label)+'</span>'+
+        (t.id===tenantsCache.activeId?'<span class="tsw-cur">current</span>':'')+'</button>').join('');
+    menu.innerHTML = items + '<div class="tsw-sep"></div>'+
+      '<button class="tsw-item tsw-add" data-add="1"><span class="tsw-plus">+</span> Add or manage tenants</button>';
+    menu.querySelectorAll('[data-id]').forEach(b=> b.addEventListener('click', ()=>{ toggleTswMenu(false); switchTenant(b.dataset.id); }));
+    const add = menu.querySelector('[data-add]'); if(add) add.addEventListener('click', ()=>{ toggleTswMenu(false); goToArea('settings'); });
+  }
+  function toggleTswMenu(show){
+    const m = document.getElementById('tswMenu'); if(!m) return;
+    if(show===undefined) show = m.hasAttribute('hidden');
+    if(show) m.removeAttribute('hidden'); else m.setAttribute('hidden','');
+  }
+  function switchTenant(id){
+    const label = document.getElementById('tswLabel'); if(label) label.textContent = 'Switching…';
+    fetch('/api/tenants/'+encodeURIComponent(id)+'/activate',{ method:'POST' })
+      .then(r=>r.json()).then(()=>{ loadTenants().then(()=>{ refreshAll(); }); })
+      .catch(()=>{ loadTenants(); });
+  }
+  function renderTenants(){
+    const box = document.getElementById('tenantList'); if(!box) return;
+    const ts = tenantsCache.tenants||[];
+    if(!ts.length){ box.innerHTML = '<div class="tl-empty">No tenants saved yet. Add one below.</div>'; return; }
+    box.innerHTML = ts.map(t=>
+      '<div class="tl-row'+(t.id===tenantsCache.activeId?' active':'')+'">'+
+        '<div class="tl-main"><div class="tl-label">'+escHtml(t.label)+
+          (t.id===tenantsCache.activeId?' <span class="tl-badge">active</span>':'')+'</div>'+
+          '<div class="tl-sub">'+escHtml(t.tenantId)+'</div></div>'+
+        '<div class="tl-actions">'+
+          (t.id===tenantsCache.activeId?'':'<button class="btn sm" data-use="'+t.id+'">Use</button>')+
+          '<button class="btn sm" data-edit="'+t.id+'">Edit</button>'+
+          '<button class="btn sm danger" data-del="'+t.id+'">Delete</button>'+
+        '</div></div>').join('');
+    box.querySelectorAll('[data-use]').forEach(b=> b.addEventListener('click', ()=> switchTenant(b.dataset.use)));
+    box.querySelectorAll('[data-edit]').forEach(b=> b.addEventListener('click', ()=> editTenant(b.dataset.edit)));
+    box.querySelectorAll('[data-del]').forEach(b=> b.addEventListener('click', ()=> deleteTenant(b.dataset.del)));
+  }
+  function editTenant(id){
+    const t = (tenantsCache.tenants||[]).find(x=>x.id===id); if(!t) return;
+    document.getElementById('cfgId').value = t.id;
+    document.getElementById('cfgLabel').value = t.label||'';
+    document.getElementById('cfgTenant').value = t.tenantId||'';
+    document.getElementById('cfgClient').value = t.clientId||'';
+    const s = document.getElementById('cfgSecret'); s.value=''; s.placeholder = t.hasSecret ? 'secret is set — leave blank to keep' : 'Client secret value';
+    const ft = document.getElementById('cfgFormTitle'); if(ft) ft.textContent = 'Edit "'+t.label+'"';
+    const msg = document.getElementById('cfgMsg'); if(msg){ msg.textContent=''; }
+    document.getElementById('cfgLabel').focus();
+  }
+  function resetCfgForm(){
+    ['cfgId','cfgLabel','cfgTenant','cfgClient','cfgSecret'].forEach(i=>{ const el=document.getElementById(i); if(el) el.value=''; });
+    const s = document.getElementById('cfgSecret'); if(s) s.placeholder='Client secret value';
+    const ft = document.getElementById('cfgFormTitle'); if(ft) ft.textContent='Add a tenant';
+    const msg = document.getElementById('cfgMsg'); if(msg) msg.textContent='';
+  }
+  function deleteTenant(id){
+    const t = (tenantsCache.tenants||[]).find(x=>x.id===id); if(!t) return;
+    if(!confirm('Remove "'+t.label+'"? This deletes its saved secret from this machine.')) return;
+    fetch('/api/tenants/'+encodeURIComponent(id),{ method:'DELETE' })
+      .then(r=>r.json()).then(()=>{ resetCfgForm(); loadTenants().then(()=>{ refreshAll(); }); })
+      .catch(()=>{});
+  }
+  const saveCfgBtn = document.getElementById('saveConfig');
+  if(saveCfgBtn) saveCfgBtn.addEventListener('click', ()=>{
+    const body = {
+      id: document.getElementById('cfgId').value || null,
+      label: document.getElementById('cfgLabel').value.trim(),
+      tenantId: document.getElementById('cfgTenant').value.trim(),
+      clientId: document.getElementById('cfgClient').value.trim(),
+      clientSecret: document.getElementById('cfgSecret').value.trim()
+    };
+    const msg = document.getElementById('cfgMsg');
+    if(msg){ msg.style.color='var(--muted)'; msg.textContent='Connecting…'; }
+    fetch('/api/tenants',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) })
+      .then(r=>r.json()).then(d=>{
+        if(msg){ msg.style.color = d.ok ? 'var(--good)' : 'var(--bad)'; msg.textContent = d.message; }
+        if(d.ok){ resetCfgForm(); loadTenants().then(()=>{ refreshAll(); }); }
+      }).catch(()=>{ if(msg){ msg.style.color='var(--bad)'; msg.textContent='Could not save.'; } });
+  });
+  const cfgResetBtn = document.getElementById('cfgReset');
+  if(cfgResetBtn) cfgResetBtn.addEventListener('click', resetCfgForm);
+  const tswBtn = document.getElementById('tswBtn');
+  if(tswBtn) tswBtn.addEventListener('click', (e)=>{ e.stopPropagation(); toggleTswMenu(); });
+  document.addEventListener('click', (e)=>{ const sw=document.getElementById('tenantSwitch'); if(sw && !sw.contains(e.target)) toggleTswMenu(false); });
+  const checkBtn = document.getElementById('checkPerms');
+  if(checkBtn) checkBtn.addEventListener('click', ()=>{
+    const out = document.getElementById('permResult');
+    if(out) out.innerHTML = '<div class="perm-row">Checking...</div>';
+    fetch('/api/permissions/check').then(r=>r.json()).then(d=>{
+      if(!out) return;
+      if(d.error==='not_configured'){ out.innerHTML='<div class="perm-row">Save your connection first.</div>'; return; }
+      if(d.connected===false){ out.innerHTML='<div class="perm-row"><span class="pi no">!</span><span>Not connected: '+(d.message||'')+'</span></div>'; return; }
+      out.innerHTML = (d.checks||[]).map(c=>{
+        const cls = c.granted ? 'ok' : 'no';
+        const icon = c.granted ? '&#10003;' : '&#10007;';
+        const note = c.granted ? '' : ' — these tiles will not work: '+c.tiles.join(', ');
+        return '<div class="perm-row"><span class="pi '+cls+'">'+icon+'</span><span class="pperm">'+c.permission+'</span><span class="ptiles">'+note+'</span></div>';
+      }).join('');
+    }).catch(()=>{ if(out) out.innerHTML='<div class="perm-row">Check failed.</div>'; });
   });
 
   // --- KPI tile icons ---
@@ -1242,7 +1837,92 @@
   }
   injectKpiIcons();
 
+  // ---- Drag-to-reorder detail cards (arrangement saved per tenant) ----------
+  function detailCards(){ return [...document.querySelectorAll('.details > .card')]; }
+  function cardKey(c){ return (c.getAttribute('aria-label')||'').split(',')[0].trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''); }
+  function layoutKey(){ return tenantsCache.activeId ? ('m365mon.layout.'+tenantsCache.activeId) : null; }
+  function orderedKeys(){
+    return detailCards()
+      .map(c=>({ c, o: parseInt(getComputedStyle(c).order) || 0 }))
+      .sort((a,b)=> a.o - b.o)
+      .map(x=> cardKey(x.c));
+  }
+  function applyOrder(keys){
+    detailCards().forEach(c=>{ const i = keys.indexOf(cardKey(c)); c.style.order = i >= 0 ? (i+1) : 99; });
+  }
+  function showReset(on){ const b = document.getElementById('resetLayout'); if(b) b.style.display = on ? '' : 'none'; }
+  function saveLayout(keys){ const k = layoutKey(); if(!k) return; try{ localStorage.setItem(k, JSON.stringify(keys)); }catch{} showReset(true); }
+  function applyLayout(){
+    const k = layoutKey(); let keys = null;
+    if(k){ try{ keys = JSON.parse(localStorage.getItem(k) || 'null'); }catch{} }
+    if(Array.isArray(keys) && keys.length){ applyOrder(keys); showReset(true); }
+    else { detailCards().forEach(c=> c.style.order = ''); showReset(false); }
+  }
+  function resetLayout(){ const k = layoutKey(); if(k){ try{ localStorage.removeItem(k); }catch{} } detailCards().forEach(c=> c.style.order = ''); showReset(false); }
+  function reorderCards(draggedKey, targetKey, before){
+    let keys = orderedKeys().filter(x=> x !== draggedKey);
+    let idx = keys.indexOf(targetKey);
+    if(idx < 0) idx = keys.length; else if(!before) idx += 1;
+    keys.splice(idx, 0, draggedKey);
+    applyOrder(keys); saveLayout(keys);
+  }
+  let dragCard = null, dragging = false, dragStartX = 0, dragStartY = 0, dropTarget = null, dropBefore = false;
+  function clearDropMarks(){ detailCards().forEach(c=> c.classList.remove('drop-before','drop-after')); }
+  function initDragReorder(){
+    detailCards().forEach(card=>{
+      if(card.querySelector('.drag-handle')) return;
+      const h = document.createElement('button');
+      h.className = 'drag-handle'; h.type = 'button'; h.title = 'Drag to rearrange';
+      h.setAttribute('aria-label','Drag to rearrange this card');
+      h.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.4"/><circle cx="15" cy="6" r="1.4"/><circle cx="9" cy="12" r="1.4"/><circle cx="15" cy="12" r="1.4"/><circle cx="9" cy="18" r="1.4"/><circle cx="15" cy="18" r="1.4"/></svg>';
+      h.addEventListener('click', e=>{ e.stopPropagation(); e.preventDefault(); });
+      // Pointer events = one code path for mouse and touch
+      h.addEventListener('pointerdown', e=>{
+        e.preventDefault(); e.stopPropagation();
+        dragCard = card; dragging = false; dropTarget = null;
+        dragStartX = e.clientX; dragStartY = e.clientY;
+        try{ h.setPointerCapture(e.pointerId); }catch{}
+      });
+      h.addEventListener('pointermove', e=>{
+        if(!dragCard) return;
+        if(!dragging){
+          if(Math.abs(e.clientX - dragStartX) < 5 && Math.abs(e.clientY - dragStartY) < 5) return;
+          dragging = true; dragCard.classList.add('dragging');
+        }
+        const under = document.elementFromPoint(e.clientX, e.clientY);
+        const target = under && under.closest('.details > .card');
+        clearDropMarks(); dropTarget = null;
+        if(target && target !== dragCard){
+          const r = target.getBoundingClientRect();
+          dropBefore = e.clientX < r.left + r.width/2;
+          target.classList.toggle('drop-before', dropBefore);
+          target.classList.toggle('drop-after', !dropBefore);
+          dropTarget = target;
+        }
+      });
+      const finish = ()=>{
+        if(dragCard){
+          dragCard.classList.remove('dragging');
+          if(dragging && dropTarget && dropTarget !== dragCard)
+            reorderCards(cardKey(dragCard), cardKey(dropTarget), dropBefore);
+        }
+        clearDropMarks();
+        dragCard = null; dragging = false; dropTarget = null;
+      };
+      h.addEventListener('pointerup', finish);
+      h.addEventListener('pointercancel', finish);
+      card.insertBefore(h, card.firstChild);
+    });
+    const rb = document.getElementById('resetLayout');
+    if(rb) rb.addEventListener('click', resetLayout);
+  }
+  initDragReorder();
+  applyLayout();
+
   refreshAll();
+
+  // load tenants for the switcher; first run with none saved lands on Settings
+  loadTenants().then(()=>{ if(!(tenantsCache.tenants||[]).length) goToArea('settings'); });
 </script>
 </body>
 </html>

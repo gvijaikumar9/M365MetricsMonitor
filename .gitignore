@@ -8,3 +8,9 @@ obj/
 appsettings.json
 appsettings.*.json
 !appsettings.example.json
+
+# Saved multi-tenant connections (contain client secrets).
+tenants.json
+
+# Local metric history for trend deltas.
+snapshots.json
