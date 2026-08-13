@@ -222,6 +222,9 @@
   .suite-btn{background:none; border:none; color:#fff; cursor:pointer; padding:7px; border-radius:6px; display:grid; place-items:center; opacity:.92}
   .suite-btn:hover{background:rgba(255,255,255,.14); opacity:1}
   .suite-btn svg{width:18px; height:18px}
+  .upd-pill{align-items:center; gap:5px; background:var(--good); color:#fff; text-decoration:none; font-size:12px; font-weight:600; padding:4px 11px; border-radius:999px; cursor:pointer; white-space:nowrap}
+  .upd-pill:hover{filter:brightness(1.1)}
+  .help-ver{display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:22px; padding-top:16px; border-top:1px solid var(--border); font-size:12.5px; color:var(--faint)}
   .suite-reset{display:flex; align-items:center; gap:6px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); color:#fff; cursor:pointer; padding:6px 12px; border-radius:999px; font-size:12.5px; opacity:.95}
   .suite-reset:hover{background:rgba(255,255,255,.16); opacity:1}
   .suite-reset svg{width:14px; height:14px; flex:none}
@@ -387,6 +390,7 @@
 <div class="suitebar">
   <button class="waffle" id="waffleBtn" title="Menu" aria-label="Toggle menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
   <span class="suite-name">M365 Metrics Monitor</span>
+  <a class="upd-pill" id="updPill" target="_blank" rel="noopener" style="display:none"></a>
   <div class="spacer"></div>
   <button class="suite-reset" id="resetLayout" title="Restore the default card arrangement" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Reset layout</button>
   <button class="suite-btn" id="helpBtn" title="Help &amp; setup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 2.5"/><path d="M12 17h.01"/></svg></button>
@@ -940,6 +944,12 @@
 
       <h3>Rearranging &amp; secrets</h3>
       <p>On the Overview, hover a card and drag its top-left handle to rearrange; a <b>Reset layout</b> button appears in the top bar once you&rsquo;ve changed the order. Your client secret is stored only on this machine and is never displayed back or sent anywhere but Microsoft Graph.</p>
+
+      <div class="help-ver">
+        <span id="verLine">Version&hellip;</span>
+        <button class="btn" id="checkUpdBtn" type="button">Check for updates</button>
+        <span id="updStatus" class="save-msg"></span>
+      </div>
     </div>
   </div>
 </div>
@@ -1021,6 +1031,26 @@
   if(helpClose) helpClose.addEventListener('click', closeHelp);
   if(helpOverlay) helpOverlay.addEventListener('click', e=>{ if(e.target === helpOverlay) closeHelp(); });
   document.addEventListener('keydown', e=>{ if(e.key === 'Escape'){ closeHelp(); closeFb(); } });
+  // update check: compares this build to the latest GitHub release
+  function checkUpdates(manual){
+    const pill = document.getElementById('updPill'), status = document.getElementById('updStatus');
+    if(manual && status){ status.style.color = 'var(--muted)'; status.textContent = 'Checking…'; }
+    fetch('/api/update-check').then(r=>r.json()).then(d=>{
+      const v = document.getElementById('verLine'); if(v) v.textContent = 'Version ' + (d.current || '?');
+      if(pill && d.updateAvailable && d.latest){
+        pill.textContent = '↑ Update available: ' + d.latest;
+        pill.href = d.url; pill.title = 'A newer version is on GitHub — click to view the release';
+        pill.style.display = 'inline-flex';
+        if(status) status.textContent = '';
+      } else {
+        if(pill) pill.style.display = 'none';
+        if(manual && status){ status.style.color = 'var(--good)'; status.textContent = '✓ Up to date (v' + (d.current || '?') + ')'; }
+      }
+    }).catch(()=>{ if(manual && status){ status.style.color = 'var(--bad)'; status.textContent = 'Update check failed.'; } });
+  }
+  const checkUpdBtn = document.getElementById('checkUpdBtn');
+  if(checkUpdBtn) checkUpdBtn.addEventListener('click', ()=> checkUpdates(true));
+  checkUpdates(false);
 
   // --- live data wiring (falls back to sample data if /api is not configured) ---
   function cardByHeading(text){

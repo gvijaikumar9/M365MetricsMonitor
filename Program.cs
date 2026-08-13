@@ -19,6 +19,7 @@ app.UseStaticFiles();
 var tenantId = builder.Configuration["Graph:TenantId"];
 var clientId = builder.Configuration["Graph:ClientId"];
 var clientSecret = builder.Configuration["Graph:ClientSecret"];
+var appVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "0.2.0";
 
 // Free / self-service SKUs (provisioned with huge seat counts) to keep out of the
 // "unused licenses" total.
@@ -233,6 +234,35 @@ app.MapGet("/api/permissions/check", async () =>
     await Add("ServiceHealth.Read.All", new[] { "Service health", "Services" }, async () => await G().Admin.ServiceAnnouncement.HealthOverviews.GetAsync());
     await Add("SecurityEvents.Read.All", new[] { "Secure Score" }, async () => await G().Security.SecureScores.GetAsync(rc => rc.QueryParameters.Top = 1));
     return Results.Json(new { connected = true, checks });
+});
+
+// GET /api/update-check -> compares this build to the latest GitHub release so the UI can
+// flag when a newer version is available. Runs server-side to avoid browser CORS and to send
+// the User-Agent header the GitHub API requires. Bounded so a slow GitHub can't hang the app.
+app.MapGet("/api/update-check", async () =>
+{
+    const string repo = "gvijaikumar9/M365MetricsMonitor";
+    const string repoUrl = "https://github.com/gvijaikumar9/M365MetricsMonitor";
+    try
+    {
+        using var http = new HttpClient();
+        using var msg = new HttpRequestMessage(HttpMethod.Get, $"https://api.github.com/repos/{repo}/releases/latest");
+        msg.Headers.UserAgent.ParseAdd($"M365MetricsMonitor/{appVersion}");
+        msg.Headers.Accept.ParseAdd("application/vnd.github+json");
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(8));
+        var resp = await http.SendAsync(msg, cts.Token);
+        if (!resp.IsSuccessStatusCode)   // no releases yet (404) or rate-limited -> "no update"
+            return Results.Json(new { current = appVersion, latest = (string?)null, updateAvailable = false, url = repoUrl });
+        var doc = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement>(await resp.Content.ReadAsStringAsync());
+        var tag = doc.TryGetProperty("tag_name", out var t) ? t.GetString() : null;
+        var html = doc.TryGetProperty("html_url", out var h) ? h.GetString() : repoUrl;
+        var newer = tag is not null && CompareVersions(tag, appVersion) > 0;
+        return Results.Json(new { current = appVersion, latest = tag, updateAvailable = newer, url = html ?? repoUrl });
+    }
+    catch (Exception ex)
+    {
+        return Results.Json(new { current = appVersion, latest = (string?)null, updateAvailable = false, url = repoUrl, error = ex.Message });
+    }
 });
 
 // Usage reports come back as CSV, fetched with a raw token.
@@ -583,6 +613,21 @@ app.Lifetime.ApplicationStarted.Register(() =>
 
 Console.WriteLine($"M365 Metrics Monitor running at {url}");
 app.Run();
+
+// Compares two dotted version strings, ignoring a leading "v". >0 when a is newer than b.
+static int CompareVersions(string a, string b)
+{
+    static int[] Parts(string s) => s.TrimStart('v', 'V').Split('.', '-')
+        .Select(p => int.TryParse(p, out var n) ? n : 0).ToArray();
+    var pa = Parts(a);
+    var pb = Parts(b);
+    for (int i = 0; i < Math.Max(pa.Length, pb.Length); i++)
+    {
+        int x = i < pa.Length ? pa[i] : 0, y = i < pb.Length ? pb[i] : 0;
+        if (x != y) return x.CompareTo(y);
+    }
+    return 0;
+}
 
 // ---- helpers ----------------------------------------------------------------
 static bool NotConfigured(string? v) => string.IsNullOrWhiteSpace(v) || v.StartsWith("YOUR_");
