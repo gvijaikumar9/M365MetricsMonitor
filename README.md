@@ -13,25 +13,28 @@ anything, you still use the Microsoft admin center.
 
 ## What it shows
 
-- **Service health** (live) and the active advisories
-- **Unused licences** and, with your cost rates entered in Settings, the monthly idle spend
+- **Service health** and the actual named advisories/incidents (by severity)
+- **Unused licences** and, with your cost rates in Settings, the monthly idle spend
 - **Guest users**, **users by domain**
-- **Storage used**, **sites by template**, **top sites by storage**
+- **Storage used** with a **quota bar**, **sites by template**, **top sites**
 - **App secrets and certificates expiring** across all app registrations
-- **Copilot adoption**, **workload activity**
+- **Copilot adoption**, **workload activity** (active users by service, as a donut)
 - **Secure Score** and security posture
 - **Governance**: ownerless groups, empty groups, admin role holders
 
 Tiles are marked **LIVE** (current directory data) or **~2D** (from usage reports,
-about one to two days behind).
+about one to two days behind). Once the tool has run on more than one day it shows a
+**trend arrow** under each number (green means the metric improved, red means it got
+worse).
 
 ## Run it
 
 ### Option A - the packaged app (no .NET needed)
 
 1. Download and unzip the release folder.
-2. Do the one-time app registration below and put your three values in `appsettings.json`.
-3. Run `M365MetricsMonitor.exe`. The dashboard opens at `http://localhost:5137`.
+2. Run `M365MetricsMonitor.exe`. The dashboard opens at `http://localhost:5137`.
+3. On first run it lands on **Settings**. Do the one-time app registration below,
+   then add your tenant right in the page (no file editing).
 
 ### Option B - from source
 
@@ -39,8 +42,8 @@ about one to two days behind).
 dotnet run
 ```
 
-Until `appsettings.json` is filled in, the dashboard runs on sample data and the
-badge reads `SAMPLE`. Once configured it turns green and reads `LIVE DATA`.
+Until a tenant is connected the dashboard shows sample data and the status dot on the
+tenant pill is amber. Once connected it turns green and the tiles go live.
 
 ## One-time app registration
 
@@ -59,14 +62,19 @@ you grant.
    - `Directory.Read.All`  (app secrets, admin roles)
    - `ServiceHealth.Read.All`  (service health, message center)
    - `SecurityEvents.Read.All`  (Secure Score)
-3. **Certificates & secrets** > **New client secret**. Copy the secret **Value**
+3. **Certificates & secrets**, **New client secret**. Copy the secret **Value**
    right away (it is shown only once).
-4. Put three values into `appsettings.json`:
-   - **Directory (tenant) ID** -> `Graph:TenantId`
-   - **Application (client) ID** -> `Graph:ClientId`
-   - the secret value -> `Graph:ClientSecret`
+4. In the app, open **Settings > Tenants** and enter:
+   - **Label** - a friendly name (for example "Contoso Production")
+   - **Tenant ID** - Directory (tenant) ID
+   - **Client ID** - Application (client) ID
+   - **Client Secret** - the value you copied
 
-That is everything. There is nothing to sign in to.
+   Click **Save & connect**. Use **Check permissions** to confirm every scope is
+   granted; it flags which tiles will not work if any is missing.
+
+The **Help** icon (top right) has these same steps inside the app for first-time
+users.
 
 ### Optional (extended)
 
@@ -74,20 +82,37 @@ The **Stale accounts** and **guest inactivity** figures read `signInActivity`, w
 needs `AuditLog.Read.All` plus an **Entra ID P1** licence. Without it those two stay
 on sample values. Everything else works on the permissions above.
 
+## Multiple tenants
+
+Add more than one tenant in **Settings > Tenants** and switch between them from the
+**tenant pill** at the top right. Each tenant keeps its own dashboard layout and its
+own trend history. Connections are stored in `tenants.json` next to the app (it holds
+the client secrets, so it is git-ignored and never leaves the machine).
+
 ## Settings
 
-Open **Settings** in the app to:
-- enter a **monthly cost per licence** (Microsoft Graph does not expose prices), so the
-  Unused Licences tile shows real idle spend,
-- set alert thresholds.
+Open **Settings** to:
 
-Both are stored in your browser.
+- enter a **monthly cost per licence** (Microsoft Graph does not expose prices), so
+  the Unused Licences tile shows real idle spend,
+- enter your **total SharePoint storage quota** (Graph does not expose it app-only;
+  find it in the SharePoint admin center) to drive the storage bar,
+- set **alert thresholds** used to highlight tiles.
+
+These are stored in your browser. The theme (light/dark) is remembered too.
+
+## Rearranging the dashboard
+
+On the Overview, hover a card and drag its **top-left handle** to rearrange it (works
+with mouse and touch). The arrangement is saved for the active tenant. A **Reset
+layout** button appears in the top bar once you have changed the order.
 
 ## Security
 
-Your client secret lives in `appsettings.json`. It is **git-ignored** - never commit
-it. Ship `appsettings.example.json` (placeholders) instead. If the secret ever leaks,
-rotate it in the app registration.
+Your client secrets live in `tenants.json` (and `appsettings.json` if you seed one
+there). Both are **git-ignored** - never commit them. Ship `appsettings.example.json`
+(placeholders) instead. The secret is never shown back in the UI or sent anywhere but
+Microsoft Graph. If a secret ever leaks, rotate it in the app registration.
 
 ## Build a single-file release
 
