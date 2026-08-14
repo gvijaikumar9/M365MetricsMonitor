@@ -76,16 +76,6 @@
   .fresh.delayed{background:var(--warn-soft); color:var(--warn)}
   .fresh.static{position:static}
 
-  .health{display:flex; align-items:center; gap:14px; padding:14px 18px; border-radius:14px;
-    background:var(--surface); border:1px solid var(--border); box-shadow:var(--shadow); margin-bottom:18px; position:relative}
-  .health .ring{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;
-    background:var(--good-soft); color:var(--good); font-size:20px; flex:none}
-  .health .h-main{font-weight:700}
-  .health .h-sub{color:var(--muted); font-size:12.5px}
-  .health .pills{display:flex; gap:8px; flex-wrap:wrap}
-  .hpill{font-size:12px; padding:5px 10px; border-radius:999px; font-weight:600}
-  .hpill.warn{background:var(--warn-soft); color:var(--warn)}
-  .hpill.info{background:var(--accent-soft); color:var(--accent)}
 
   .grid{display:grid; gap:14px; align-items:stretch}
   .card.flip{display:grid}
@@ -102,14 +92,10 @@
   .card.linkable{cursor:pointer}
   .card.linkable:hover{box-shadow:var(--shadow-hi); border-color:var(--accent)}
   .card.linkable:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
-  /* flip removed: hide the (sample) backs and flip affordance */
-  .face.back{display:none}
+  /* flip removed: cards are single-face and click through to the full list */
   .hint{display:none}
-  .flip-inner{display:grid; transform-style:preserve-3d; transition:transform .55s cubic-bezier(.2,.7,.2,1)}
-  .card.flipped .flip-inner{transform:rotateY(180deg)}
-  .face{grid-area:1/1; position:relative; padding:16px; min-width:0;
-    -webkit-backface-visibility:hidden; backface-visibility:hidden}
-  .face.back{transform:rotateY(180deg)}
+  .flip-inner{display:grid}
+  .face{grid-area:1/1; position:relative; padding:16px; min-width:0}
 
   /* flip hint fully removed */
 
@@ -199,12 +185,6 @@
   .tag.good{background:var(--good-soft); color:var(--good)}
 
   /* back-of-tile */
-  .bk-title{font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; color:var(--muted); margin-bottom:8px}
-  .bk-row{display:flex; justify-content:space-between; gap:10px; font-size:13px; padding:5px 0; border-bottom:1px solid var(--border)}
-  .bk-row:last-of-type{border-bottom:0}
-  .bk-row b{font-variant-numeric:tabular-nums}
-  .bk-action{margin-top:11px; font-size:12.5px; color:var(--muted); display:flex; gap:7px; align-items:flex-start; padding-right:34px}
-  .bk-action svg{width:14px; height:14px; flex:none; margin-top:1px; color:var(--accent)}
   .spark{width:100%; height:34px; margin:8px 0 2px; display:block}
   .spark polyline{fill:none; stroke:var(--accent); stroke-width:2.2; vector-effect:non-scaling-stroke; stroke-linejoin:round; stroke-linecap:round}
   .spark .area{fill:var(--accent-soft); stroke:none}
@@ -333,6 +313,7 @@
   .rate-rows .rate{display:grid; grid-template-columns:1fr 130px; align-items:center; gap:10px}
   .rate-rows .rate span{font-size:13px}
   .rate-rows input,.thr-rows input{width:120px; padding:6px 8px; border:1px solid var(--border); border-radius:7px; background:var(--surface-2); color:var(--text); font-size:13px}
+  .thr-rows select{padding:6px 8px; border:1px solid var(--border); border-radius:7px; background:var(--surface-2); color:var(--text); font-size:13px; cursor:pointer}
   .thr-rows label{font-size:13px; display:flex; align-items:center; gap:8px; flex-wrap:wrap}
   .settings-actions{display:flex; align-items:center; gap:12px}
   .btn.primary{background:var(--accent); color:#fff; border-color:var(--accent)}
@@ -343,6 +324,14 @@
   .conn-rows label.full{grid-column:1 / -1}
   .conn-rows input{padding:8px 10px; border:1px solid var(--border); border-radius:8px; background:var(--surface-2); color:var(--text); font-size:13px}
   @media(max-width:600px){ .conn-rows{grid-template-columns:1fr} }
+  .secret-wrap{position:relative; display:block}
+  .secret-wrap input{width:100%; padding-right:38px !important}
+  .secret-eye{position:absolute; right:6px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--muted); cursor:pointer; padding:4px; display:grid; place-items:center}
+  .secret-eye:hover{color:var(--text)}
+  .secret-eye svg{width:16px; height:16px}
+  .secret-eye .ic-hide{display:none}
+  .secret-eye.on .ic-show{display:none}
+  .secret-eye.on .ic-hide{display:block}
   /* settings card headers with a tinted icon */
   .sc-head{display:flex; align-items:center; gap:12px; margin-bottom:6px}
   .sc-head h3{margin:0}
@@ -370,6 +359,23 @@
   .listhead h2{margin:0; font-size:18px; font-weight:700}
   #listSearch{margin-left:auto; padding:8px 12px; border:1px solid var(--border); border-radius:9px; background:var(--surface); color:var(--text); font-size:13px; min-width:220px}
   #page-list .card{padding:14px 24px 18px}
+  .list-note{margin:0 0 12px; padding:8px 13px; background:var(--accent-soft); color:var(--accent); border:1px solid var(--accent); border-radius:9px; font-size:12px; line-height:1.45}
+  .list-note[hidden]{display:none}
+  .list-note a{color:inherit; font-weight:700}
+  .list-chart{margin:2px 0 18px}
+  .list-chart[hidden]{display:none}
+  .tbar-row{display:flex; flex-wrap:wrap; align-items:center; gap:8px 14px}
+  .tbar{display:flex; flex:1 1 260px; min-width:120px; height:16px; border-radius:8px; overflow:hidden; background:var(--surface-2); border:1px solid var(--border)}
+  .tbar-seg{display:block; height:100%}
+  .tbar-used{flex:0 0 auto; margin-left:auto; color:var(--muted); font-size:12.5px; white-space:nowrap}
+  .tbar-used a{color:var(--accent); font-weight:600; text-decoration:none}
+  .tbar-used a:hover{text-decoration:underline}
+  .tbar-legend{display:flex; flex-wrap:wrap; align-items:center; gap:16px; margin-top:11px; font-size:12.5px}
+  .tbar-item{display:inline-flex; align-items:center; gap:7px; color:var(--text)}
+  .tbar-item b{font-weight:600}
+  .tbar-item em{color:var(--faint); font-style:normal; margin-left:2px}
+  .tbar-dot{width:9px; height:9px; border-radius:50%; flex:none}
+  .tbar-dot.tbar-free{background:var(--surface-2); border:1px solid var(--border)}
   .listwrap{overflow-x:auto}
   .listtable{width:100%; border-collapse:collapse; font-size:13px}
   .listtable th{text-align:left; color:var(--faint); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.4px; padding:8px; border-bottom:1px solid var(--border); white-space:nowrap; user-select:none}
@@ -467,16 +473,9 @@
         <div class="face front">
           <span class="fresh live"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>LIVE</span>
           <div class="label">Service health</div>
-          <div class="value">Healthy</div>
-          <div class="note"><span class="state good">&#9679; 0 incidents</span></div>
+          <div class="value">&mdash;</div>
+          <div class="note"></div>
           <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
-        </div>
-        <div class="face back">
-          <div class="bk-title">Open items</div>
-          <div class="bk-row"><span>Exchange advisory</span><b>EX582104</b></div>
-          <div class="bk-row"><span>Incidents last 7 days</span><b>0</b></div>
-          <div class="bk-row"><span>Message center changes</span><b>3</b></div>
-          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4m0 4h.01M12 3l9 16H3z"/></svg>Next change: new Teams rollout on Aug 20</div>
         </div>
       </div>
     </div>
@@ -486,17 +485,9 @@
         <div class="face front">
           <span class="fresh live"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>LIVE</span>
           <div class="label">Unused licenses</div>
-          <div class="value tnum">142</div>
-          <div class="note">&asymp; <b>$4,970</b> / month idle</div>
+          <div class="value tnum">&mdash;</div>
+          <div class="note"></div>
           <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
-        </div>
-        <div class="face back">
-          <div class="bk-title">Free by plan</div>
-          <div class="bk-row"><span>Copilot</span><b>90</b></div>
-          <div class="bk-row"><span>M365 E3</span><b>90</b></div>
-          <div class="bk-row"><span>M365 E5</span><b>20</b></div>
-          <svg class="spark" viewBox="0 0 100 30" preserveAspectRatio="none"><polyline points="0,22 20,20 40,17 60,14 80,12 100,8"/></svg>
-          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Reclaim the 90 Copilot seats first, biggest cost</div>
         </div>
       </div>
     </div>
@@ -506,16 +497,9 @@
         <div class="face front">
           <span class="fresh live"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>LIVE</span>
           <div class="label">Guest users</div>
-          <div class="value tnum">318</div>
-          <div class="note"><span class="state warn">&#9650; 12 this month</span></div>
+          <div class="value tnum">&mdash;</div>
+          <div class="note"></div>
           <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
-        </div>
-        <div class="face back">
-          <div class="bk-title">Guests</div>
-          <div class="bk-row"><span>New this month</span><b>12</b></div>
-          <div class="bk-row"><span>Stale, no sign-in 90d</span><b>129</b></div>
-          <div class="bk-row"><span>Invites never accepted</span><b>8</b></div>
-          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Review 129 stale guests for removal</div>
         </div>
       </div>
     </div>
@@ -525,17 +509,9 @@
         <div class="face front">
           <span class="fresh delayed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>~2D</span>
           <div class="label">Storage used</div>
-          <div class="value tnum">4.2<small> / 25 TB</small></div>
-          <div class="note">17% of tenant quota</div>
+          <div class="value tnum">&mdash;</div>
+          <div class="note"></div>
           <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
-        </div>
-        <div class="face back">
-          <div class="bk-title">Where it sits</div>
-          <div class="bk-row"><span>SharePoint</span><b>3.1 TB</b></div>
-          <div class="bk-row"><span>OneDrive</span><b>1.1 TB</b></div>
-          <div class="bk-row"><span>Growth</span><b>42 GB / mo</b></div>
-          <svg class="spark" viewBox="0 0 100 30" preserveAspectRatio="none"><polyline points="0,24 20,22 40,19 60,16 80,13 100,10"/></svg>
-          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>About 40 months to quota at this rate</div>
         </div>
       </div>
     </div>
@@ -545,16 +521,9 @@
         <div class="face front">
           <span class="fresh live"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>LIVE</span>
           <div class="label">Secrets expiring &le; 30d</div>
-          <div class="value tnum">3</div>
-          <div class="note"><span class="state bad">&#9679; action needed</span></div>
+          <div class="value tnum">&mdash;</div>
+          <div class="note"></div>
           <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
-        </div>
-        <div class="face back">
-          <div class="bk-title">Expiring soon</div>
-          <div class="bk-row"><span>Graph Connector Agent</span><b>4 days</b></div>
-          <div class="bk-row"><span>Intranet Crawler cert</span><b>11 days</b></div>
-          <div class="bk-row"><span>Power BI Gateway</span><b>26 days</b></div>
-          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4m0 4h.01M12 3l9 16H3z"/></svg>Rotate the Graph Connector secret now</div>
         </div>
       </div>
     </div>
@@ -564,17 +533,9 @@
         <div class="face front">
           <span class="fresh delayed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>~2D</span>
           <div class="label">Copilot active</div>
-          <div class="value tnum">64%</div>
-          <div class="note">160 of 250 licenses used</div>
+          <div class="value tnum">&mdash;</div>
+          <div class="note"></div>
           <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
-        </div>
-        <div class="face back">
-          <div class="bk-title">Active by app</div>
-          <div class="bk-row"><span>Teams</span><b>132</b></div>
-          <div class="bk-row"><span>Word</span><b>88</b></div>
-          <div class="bk-row"><span>Outlook</span><b>76</b></div>
-          <svg class="spark" viewBox="0 0 100 30" preserveAspectRatio="none"><polyline points="0,26 20,23 40,20 60,15 80,12 100,9"/></svg>
-          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4m0 4h.01M12 3l9 16H3z"/></svg>90 licenses assigned but never used</div>
         </div>
       </div>
     </div>
@@ -588,13 +549,6 @@
           <div class="note">needs Entra ID P1</div>
           <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
         </div>
-        <div class="face back">
-          <div class="bk-title">Not available</div>
-          <div class="bk-row"><span>Stale accounts read</span><b>signInActivity</b></div>
-          <div class="bk-row"><span>Which needs</span><b>AuditLog.Read.All</b></div>
-          <div class="bk-row"><span>And a licence</span><b>Entra ID P1</b></div>
-          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4m0 4h.01M12 3l9 16H3z"/></svg>Grant the scope and add P1 to light this tile up</div>
-        </div>
       </div>
     </div>
 
@@ -603,17 +557,9 @@
         <div class="face front">
           <span class="fresh delayed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>~2D</span>
           <div class="label">Secure Score</div>
-          <div class="value tnum">72%</div>
-          <div class="note"><span class="state good">&#9650; 4 pts this month</span></div>
+          <div class="value tnum">&mdash;</div>
+          <div class="note"></div>
           <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
-        </div>
-        <div class="face back">
-          <div class="bk-title">Top point gains</div>
-          <div class="bk-row"><span>Require MFA for admins</span><b>+18</b></div>
-          <div class="bk-row"><span>Block legacy auth</span><b>+12</b></div>
-          <div class="bk-row"><span>vs similar orgs</span><b>72 vs 69</b></div>
-          <svg class="spark" viewBox="0 0 100 30" preserveAspectRatio="none"><polyline points="0,20 20,19 40,16 60,15 80,12 100,11"/></svg>
-          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>MFA for admins is the biggest quick win</div>
         </div>
       </div>
     </div>
@@ -628,22 +574,9 @@
         <div class="face front">
           <span class="fresh live"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>LIVE</span>
           <h3>Users by domain</h3>
-          <p class="cap">1,945 users across 4 verified domains</p>
-          <div class="bars">
-            <div class="barrow"><span class="name">contoso.com</span><span class="track"><span class="fill" data-w="100"></span></span><span class="val tnum">1,240</span></div>
-            <div class="barrow"><span class="name">contoso.onmicrosoft.com</span><span class="track"><span class="fill" data-w="25"></span></span><span class="val tnum">310</span></div>
-            <div class="barrow"><span class="name">partner.contoso.com</span><span class="track"><span class="fill" data-w="24"></span></span><span class="val tnum">297</span></div>
-            <div class="barrow"><span class="name">contoso.co.uk</span><span class="track"><span class="fill" data-w="8"></span></span><span class="val tnum">98</span></div>
-          </div>
+          <p class="cap"></p>
+          <div class="bars"></div>
           <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
-        </div>
-        <div class="face back">
-          <div class="bk-title">Across all domains</div>
-          <div class="bk-row"><span>Enabled</span><b>1,860</b></div>
-          <div class="bk-row"><span>Disabled</span><b>85</b></div>
-          <div class="bk-row"><span>Unlicensed</span><b>112</b></div>
-          <div class="bk-row"><span>New this month</span><b>34</b></div>
-          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>112 unlicensed accounts to review</div>
         </div>
       </div>
     </div>
@@ -653,22 +586,9 @@
         <div class="face front">
           <span class="fresh delayed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>~2D</span>
           <h3>Sites by template</h3>
-          <p class="cap">1,406 SharePoint sites</p>
-          <div class="bars">
-            <div class="barrow"><span class="name">Team site (Group)</span><span class="track"><span class="fill" data-w="100"></span></span><span class="val tnum">824</span></div>
-            <div class="barrow"><span class="name">Communication</span><span class="track"><span class="fill" data-w="26"></span></span><span class="val tnum">214</span></div>
-            <div class="barrow"><span class="name">Team site (classic)</span><span class="track"><span class="fill" data-w="23"></span></span><span class="val tnum">188</span></div>
-            <div class="barrow"><span class="name">Channel site</span><span class="track"><span class="fill" data-w="16"></span></span><span class="val tnum">132</span></div>
-            <div class="barrow"><span class="name">Other</span><span class="track"><span class="fill" data-w="6"></span></span><span class="val tnum">48</span></div>
-          </div>
+          <p class="cap"></p>
+          <div class="bars"></div>
           <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
-        </div>
-        <div class="face back">
-          <div class="bk-title">Site health</div>
-          <div class="bk-row"><span>Inactive 90 days</span><b>210</b></div>
-          <div class="bk-row"><span>Empty sites</span><b>64</b></div>
-          <div class="bk-row"><span>New this month</span><b>22</b></div>
-          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>210 inactive sites are cleanup candidates</div>
         </div>
       </div>
     </div>
@@ -678,27 +598,16 @@
         <div class="face front">
           <span class="fresh delayed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>~2D</span>
           <h3>Tenant storage</h3>
-          <p class="cap">SharePoint + OneDrive</p>
+          <p class="cap">SharePoint sites</p>
           <div class="donutwrap">
             <svg class="donut" viewBox="0 0 42 42" role="img" aria-label="17 percent used">
               <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--track)" stroke-width="5"></circle>
-              <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--accent)" stroke-width="5" stroke-dasharray="17 83" stroke-dashoffset="25" stroke-linecap="round"></circle>
-              <text x="21" y="21" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="700">17%</text>
+              <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--accent)" stroke-width="5" stroke-dasharray="0 100" stroke-dashoffset="25" stroke-linecap="round"></circle>
+              <text x="21" y="21" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="700">&mdash;</text>
             </svg>
-            <div class="legend">
-              <div><b>4.2 TB</b> used</div>
-              <div><b>25 TB</b> licensed quota</div>
-              <div>20.8 TB free</div>
-            </div>
+            <div class="legend"></div>
           </div>
           <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
-        </div>
-        <div class="face back">
-          <div class="bk-title">Split</div>
-          <div class="bk-row"><span>SharePoint sites</span><b>3.1 TB</b></div>
-          <div class="bk-row"><span>OneDrive</span><b>1.1 TB</b></div>
-          <div class="bk-row"><span>Sites over 90% quota</span><b>7</b></div>
-          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4m0 4h.01M12 3l9 16H3z"/></svg>7 sites near their quota, warn the owners</div>
         </div>
       </div>
     </div>
@@ -708,25 +617,12 @@
         <div class="face front">
           <span class="fresh delayed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>~2D</span>
           <h3>Top sites by storage</h3>
-          <p class="cap">Largest 5 of 1,406 sites</p>
+          <p class="cap">Largest sites by storage</p>
           <table>
             <thead><tr><th>Site</th><th>Template</th><th class="r">Files</th><th class="r">Storage</th><th class="r">Last activity</th></tr></thead>
-            <tbody>
-              <tr><td>Marketing Hub</td><td>Communication</td><td class="r tnum">142,301</td><td class="r tnum">318 GB</td><td class="r">today</td></tr>
-              <tr><td>Engineering Team</td><td>Team site</td><td class="r tnum">98,442</td><td class="r tnum">274 GB</td><td class="r">today</td></tr>
-              <tr><td>Records Archive</td><td>Team site (classic)</td><td class="r tnum">210,880</td><td class="r tnum">251 GB</td><td class="r">14 days ago</td></tr>
-              <tr><td>Sales Enablement</td><td>Communication</td><td class="r tnum">61,209</td><td class="r tnum">190 GB</td><td class="r">yesterday</td></tr>
-              <tr><td>All Company</td><td>Team site (Group)</td><td class="r tnum">44,905</td><td class="r tnum">176 GB</td><td class="r">today</td></tr>
-            </tbody>
+            <tbody><tr><td colspan="5">&mdash;</td></tr></tbody>
           </table>
           <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
-        </div>
-        <div class="face back">
-          <div class="bk-title">Fastest growing</div>
-          <div class="bk-row"><span>Marketing Hub</span><b>+22 GB / mo</b></div>
-          <div class="bk-row"><span>Records Archive</span><b>+14 GB / mo</b></div>
-          <div class="bk-row"><span>Engineering Team</span><b>+11 GB / mo</b></div>
-          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4m0 4h.01M12 3l9 16H3z"/></svg>Records Archive is inactive yet still growing</div>
         </div>
       </div>
     </div>
@@ -739,21 +635,9 @@
           <p class="cap">Assigned vs owned</p>
           <table>
             <thead><tr><th>Plan</th><th class="r">Used</th><th class="r">Owned</th><th class="r">Free</th></tr></thead>
-            <tbody>
-              <tr><td>M365 E3</td><td class="r tnum">1,610</td><td class="r tnum">1,700</td><td class="r"><span class="tag warn">90</span></td></tr>
-              <tr><td>M365 E5</td><td class="r tnum">180</td><td class="r tnum">200</td><td class="r"><span class="tag warn">20</span></td></tr>
-              <tr><td>Copilot</td><td class="r tnum">160</td><td class="r tnum">250</td><td class="r"><span class="tag bad">90</span></td></tr>
-              <tr><td>Exchange P1</td><td class="r tnum">42</td><td class="r tnum">45</td><td class="r"><span class="tag good">3</span></td></tr>
-            </tbody>
+            <tbody><tr><td colspan="4">&mdash;</td></tr></tbody>
           </table>
           <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
-        </div>
-        <div class="face back">
-          <div class="bk-title">Monthly cost (your rates)</div>
-          <div class="bk-row"><span>M365 E3</span><b>$22,600</b></div>
-          <div class="bk-row"><span>Copilot</span><b>$4,800</b></div>
-          <div class="bk-row"><span>Total spend</span><b>$34,000</b></div>
-          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4m0 4h.01M12 3l9 16H3z"/></svg>Prices are set in Settings, Graph has no pricing</div>
         </div>
       </div>
     </div>
@@ -766,21 +650,9 @@
           <p class="cap">Next 60 days &middot; app registrations</p>
           <table>
             <thead><tr><th>App registration</th><th>Type</th><th class="r">Expires in</th></tr></thead>
-            <tbody>
-              <tr><td>Graph Connector Agent</td><td>Secret</td><td class="r"><span class="tag bad">4 days</span></td></tr>
-              <tr><td>Intranet Search Crawler</td><td>Certificate</td><td class="r"><span class="tag bad">11 days</span></td></tr>
-              <tr><td>Power BI Gateway</td><td>Secret</td><td class="r"><span class="tag warn">26 days</span></td></tr>
-              <tr><td>HR Sync Job</td><td>Secret</td><td class="r"><span class="tag warn">48 days</span></td></tr>
-            </tbody>
+            <tbody><tr><td colspan="3">&mdash;</td></tr></tbody>
           </table>
           <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
-        </div>
-        <div class="face back">
-          <div class="bk-title">Also worth knowing</div>
-          <div class="bk-row"><span>Already expired</span><b>1</b></div>
-          <div class="bk-row"><span>Apps with no expiry set</span><b>3</b></div>
-          <div class="bk-row"><span>Apps unused 90 days</span><b>5</b></div>
-          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4m0 4h.01M12 3l9 16H3z"/></svg>1 credential is already expired, check its app still runs</div>
         </div>
       </div>
     </div>
@@ -790,21 +662,13 @@
         <div class="face front">
           <span class="fresh delayed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>~2D</span>
           <h3>Workload activity</h3>
-          <p class="cap">Active users, last 28 days</p>
+          <p class="cap">Active users by service, last 30 days</p>
           <div class="wd-wrap">
             <div class="wd-legend"></div>
             <div class="wd-donut"></div>
           </div>
           <p class="wd-note">Counted per service &mdash; a person active in several counts in each.</p>
           <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
-        </div>
-        <div class="face back">
-          <div class="bk-title">Adoption (active of total)</div>
-          <div class="bk-row"><span>Exchange</span><b>97%</b></div>
-          <div class="bk-row"><span>Teams</span><b>94%</b></div>
-          <div class="bk-row"><span>Copilot</span><b>8%</b></div>
-          <svg class="spark" viewBox="0 0 100 30" preserveAspectRatio="none"><polyline points="0,26 20,24 40,22 60,19 80,16 100,14"/></svg>
-          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4m0 4h.01M12 3l9 16H3z"/></svg>Copilot adoption is the laggard at 8%</div>
         </div>
       </div>
     </div>
@@ -817,21 +681,14 @@
           <p class="cap">Things that quietly become problems</p>
           <table>
             <tbody>
-              <tr><td>Ownerless Microsoft 365 groups</td><td class="r"><span class="tag warn">23</span></td></tr>
-              <tr><td>Sites sharing with anyone links</td><td class="r"><span class="tag bad">37</span></td></tr>
-              <tr><td>Empty groups</td><td class="r"><span class="tag warn">61</span></td></tr>
-              <tr><td>Guests with no sign-in 90 days</td><td class="r"><span class="tag warn">129</span></td></tr>
-              <tr><td>Admin role holders</td><td class="r"><span class="tag good">9</span></td></tr>
+              <tr><td>Ownerless Microsoft 365 groups</td><td class="r"><span class="tag">&mdash;</span></td></tr>
+              <tr><td>Sites sharing with anyone links</td><td class="r"><span class="tag">&mdash;</span></td></tr>
+              <tr><td>Empty groups</td><td class="r"><span class="tag">&mdash;</span></td></tr>
+              <tr><td>Guests with no sign-in 90 days</td><td class="r"><span class="tag">&mdash;</span></td></tr>
+              <tr><td>Admin role holders</td><td class="r"><span class="tag">&mdash;</span></td></tr>
             </tbody>
           </table>
           <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
-        </div>
-        <div class="face back">
-          <div class="bk-title">Anyone-link sites (top)</div>
-          <div class="bk-row"><span>Marketing Hub</span><b>14 links</b></div>
-          <div class="bk-row"><span>Sales Enablement</span><b>9 links</b></div>
-          <div class="bk-row"><span>Vendor Portal</span><b>6 links</b></div>
-          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>Open the Sharing Link Auditor for the full list</div>
         </div>
       </div>
     </div>
@@ -845,23 +702,12 @@
           <div class="donutwrap">
             <svg class="donut" viewBox="0 0 42 42" role="img" aria-label="72 percent secure score">
               <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--track)" stroke-width="5"></circle>
-              <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--good)" stroke-width="5" stroke-dasharray="72 28" stroke-dashoffset="25" stroke-linecap="round"></circle>
-              <text x="21" y="21" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="700">72%</text>
+              <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--good)" stroke-width="5" stroke-dasharray="0 100" stroke-dashoffset="25" stroke-linecap="round"></circle>
+              <text x="21" y="21" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="700">&mdash;</text>
             </svg>
-            <div class="legend">
-              <div><b>612</b> of 850 points</div>
-              <div>MFA coverage <b>88%</b></div>
-              <div>Conditional Access <b>7</b> policies</div>
-            </div>
+            <div class="legend"></div>
           </div>
           <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
-        </div>
-        <div class="face back">
-          <div class="bk-title">MFA and access</div>
-          <div class="bk-row"><span>Registered for MFA</span><b>88%</b></div>
-          <div class="bk-row"><span>Admins without MFA</span><b>1</b></div>
-          <div class="bk-row"><span>Legacy auth</span><b>allowed</b></div>
-          <div class="bk-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4m0 4h.01M12 3l9 16H3z"/></svg>1 admin without MFA is the urgent fix</div>
         </div>
       </div>
     </div>
@@ -887,7 +733,15 @@
           <label class="full">Label <input id="cfgLabel" placeholder="e.g. Contoso Production"></label>
           <label>Tenant ID <input id="cfgTenant" placeholder="Directory (tenant) ID"></label>
           <label>Client ID <input id="cfgClient" placeholder="Application (client) ID"></label>
-          <label class="full">Client Secret <input id="cfgSecret" type="password" placeholder="Client secret value"></label>
+          <label class="full">Client Secret
+            <span class="secret-wrap">
+              <input id="cfgSecret" type="password" placeholder="Client secret value" autocomplete="off">
+              <button type="button" class="secret-eye" id="cfgSecretEye" title="Show secret" aria-label="Show or hide secret">
+                <svg class="ic-show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg class="ic-hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 4.24A9.1 9.1 0 0 1 12 4c6.5 0 10 7 10 7a17.6 17.6 0 0 1-2.16 3.19M6.6 6.6A17.4 17.4 0 0 0 2 11s3.5 7 10 7a9 9 0 0 0 5.4-1.6"/><path d="M3 3l18 18"/><path d="M9.5 9.5a3 3 0 0 0 4.2 4.2"/></svg>
+              </button>
+            </span>
+          </label>
         </div>
         <div class="settings-actions">
           <button class="btn primary" id="saveConfig">Save &amp; connect</button>
@@ -912,7 +766,7 @@
         <p class="cap">Stored locally, used to highlight tiles.</p>
         <div class="thr-rows">
           <label>Warn when a secret expires within <input type="number" id="thrSecretDays" min="1" value="30"> days</label>
-          <label>Total SharePoint storage quota <input type="number" id="thrQuotaGb" min="1" step="1" placeholder="e.g. 1024"> GB <span class="cap" style="margin:0">(Graph can't read this &mdash; find it in SharePoint admin center)</span></label>
+          <label>Total SharePoint storage quota <input type="number" id="thrQuotaVal" min="0" step="0.01" placeholder="e.g. 1.06"> <select id="thrQuotaUnit"><option value="1">GB</option><option value="1024" selected>TB</option><option value="1048576">PB</option></select> <span class="cap" style="margin:0">(Graph can't read this &mdash; find it in SharePoint admin center)</span></label>
           <label>Warn when storage is over <input type="number" id="thrStoragePct" min="1" max="100" value="80"> % of quota</label>
         </div>
         <div class="settings-actions">
@@ -930,6 +784,8 @@
         <button class="btn" id="listExport" title="Download the filtered rows as a CSV (opens in Excel)">Export CSV</button>
       </div>
       <div class="card">
+        <div class="list-note" id="listNote" hidden></div>
+        <div class="list-chart" id="listChart" hidden></div>
         <div class="listwrap"><table class="listtable"><thead id="listHead"></thead><tbody id="listBody"></tbody></table></div>
         <div class="listpager" id="listPager"></div>
       </div>
@@ -976,13 +832,30 @@
       </ol>
 
       <h3>More than one tenant</h3>
-      <p>Add more tenants in <b>Settings &rarr; Tenants</b>, then switch between them from the <b>tenant pill</b> at the top right. Each tenant keeps its own layout and trend history.</p>
+      <p>Add more tenants in <b>Settings &rarr; Tenants</b>, then switch between them from the <b>tenant pill</b> at the top right. Each tenant keeps its own layout and trend history, and its own client secret. When you <b>edit</b> a tenant its secret is shown back <b>masked</b>, with an eye toggle so you can reveal and check it &mdash; it never leaves this machine and is only ever sent to Microsoft Graph.</p>
+
+      <h3>Settings you can tune</h3>
+      <ul>
+        <li><b>Cost per licence</b> &mdash; Graph does not expose prices, so enter a monthly cost per SKU to turn the Unused Licences tile into real idle spend.</li>
+        <li><b>SharePoint storage quota</b> &mdash; Graph can&rsquo;t read the tenant quota app-only, so enter it (in <b>GB, TB or PB</b>) from the SharePoint admin center to drive the storage bar and free-space figures.</li>
+        <li><b>Alert thresholds</b> &mdash; the secret-expiry window and storage-warning percent used to highlight tiles.</li>
+      </ul>
+      <p>These live in your browser, as does the theme (light/dark), which is remembered between visits.</p>
 
       <h3>Reading the tiles</h3>
-      <p>Tiles marked <b>LIVE</b> are current directory data; <b>~2D</b> comes from usage reports, about one to two days behind. <b>Trend arrows</b> (&#9650;/&#9660;) under a number appear once the tool has data from more than one day &mdash; green means the metric improved, red means it got worse.</p>
+      <p>Tiles marked <b>LIVE</b> are current directory data; <b>~2D</b> comes from usage reports, about one to two days behind. <b>Trend arrows</b> (&#9650;/&#9660;) under a number appear once the tool has data from more than one day &mdash; green means the metric improved, red means it got worse. If a tenant is missing a permission, that one metric simply stays blank and the rest keep working.</p>
 
-      <h3>Rearranging &amp; secrets</h3>
-      <p>On the Overview, hover a card and drag its top-left handle to rearrange; a <b>Reset layout</b> button appears in the top bar once you&rsquo;ve changed the order. Your client secret is stored only on this machine and is never displayed back or sent anywhere but Microsoft Graph.</p>
+      <h3>Full lists</h3>
+      <p>Click a tile (or a left-nav item) to open the full list behind it &mdash; sortable columns, a filter box, paging and <b>Export CSV</b>. On the SharePoint list a note appears if your tenant hides site URLs (the <b>(root)</b> report privacy setting); once that setting is off, real site URLs show as clickable links.</p>
+
+      <h3>Rearranging</h3>
+      <p>On the Overview, hover a card and drag its top-left handle (mouse or touch) to rearrange it; a <b>Reset layout</b> button appears in the top bar once you&rsquo;ve changed the order. The arrangement is saved per tenant.</p>
+
+      <h3>Staying up to date</h3>
+      <p>The <b>version button</b> at the bottom-left checks GitHub for newer releases and shows a download link if one exists. The tool never auto-updates &mdash; you stay in control.</p>
+
+      <h3>What needs extra licensing</h3>
+      <p><b>Stale accounts</b> and <b>guest inactivity</b> read sign-in activity, which needs <code>AuditLog.Read.All</code> plus an <b>Entra ID P1</b> licence; without it those two stay blank. Everything else works on the permissions above.</p>
 
     </div>
   </div>
@@ -1075,7 +948,7 @@
         pill.textContent = '↑ Update available: ' + d.latest;
         pill.href = d.url; pill.title = 'A newer version is on GitHub — click to view the release';
         pill.style.display = 'inline-flex';
-        if(status){ status.style.color = 'var(--accent)'; status.innerHTML = 'New ' + escHtml(d.latest) + ' available &mdash; <a href="' + d.url + '" target="_blank" rel="noopener">Download &rarr;</a>'; }
+        if(status){ status.style.color = 'var(--accent)'; status.innerHTML = 'New ' + escHtml(d.latest) + ' available &mdash; <a href="' + escHtml(d.url) + '" target="_blank" rel="noopener">Download &rarr;</a>'; }
       } else {
         if(pill) pill.style.display = 'none';
         if(manual && status){ status.style.color = 'var(--good)'; status.textContent = '✓ Up to date (v' + (d.current || '?') + ')'; }
@@ -1116,11 +989,13 @@
         const paidTop = paid.slice().sort((a,b)=>(b.owned||0)-(a.owned||0)).slice(0, 6);   // cap card height; full set is behind "View all"
         tbody.innerHTML = paidTop.map(s=>{
           const free = s.free || 0;
-          const cls = free > 50 ? 'bad' : (free > 10 ? 'warn' : 'good');
+          // negative free = over-assigned (used exceeds owned) — an anomaly, not "healthy"
+          const cls = free < 0 ? 'warn' : (free > 50 ? 'bad' : (free > 10 ? 'warn' : 'good'));
+          const tip = free < 0 ? ' title="over-assigned: used exceeds owned"' : '';
           return '<tr><td><span class="cell-ell" title="'+escHtml(s.name)+'">'+escHtml(s.name)+'</span></td>'+
                  '<td class="r tnum">'+(s.used||0).toLocaleString()+'</td>'+
                  '<td class="r tnum">'+(s.owned||0).toLocaleString()+'</td>'+
-                 '<td class="r"><span class="tag '+cls+'">'+free+'</span></td></tr>';
+                 '<td class="r"><span class="tag '+cls+'"'+tip+'>'+free.toLocaleString()+'</span></td></tr>';
         }).join('');
       }
       addCardLink(card, 'View all '+d.skus.length, 'licenses');
@@ -1143,24 +1018,6 @@
       if(!d || d.error){ if(d && d.error) console.warn('servicehealth:', d); return; }  // keep sample on error
       const n = d.issues ? d.issues.length : 0;
       METRICS.serviceIssues = n;
-      const main = document.querySelector('.health .h-main');
-      const sub = document.querySelector('.health .h-sub');
-      if(main) main.textContent = d.healthy ? 'All Microsoft 365 services healthy'
-        : (n + ' service' + (n>1?'s':'') + ' with an active issue');
-      if(sub) sub.textContent = d.total + ' services checked';
-      const ring = document.querySelector('.health .ring');
-      if(ring){
-        ring.style.background = d.healthy ? 'var(--good-soft)' : 'var(--warn-soft)';
-        ring.style.color = d.healthy ? 'var(--good)' : 'var(--warn)';
-        ring.innerHTML = d.healthy ? '&#10003;' : '&#9888;';
-      }
-      const stripPills = document.querySelector('.health .pills');
-      if(stripPills){
-        let sl = stripPills.querySelector('.strip-link');
-        if(!sl){ sl = document.createElement('a'); sl.className = 'card-link strip-link'; sl.style.margin = '0';
-          sl.addEventListener('click', ()=> goToArea('services')); stripPills.appendChild(sl); }
-        sl.innerHTML = 'View all '+d.total+' &rarr;';
-      }
       const kpi = kpiByLabel('Service health');
       if(kpi){
         const val = kpi.querySelector('.value');
@@ -1177,16 +1034,6 @@
               '<span class="sh-tail">'+tail+'</span>';
           }
         }
-      }
-      const pills = document.querySelector('.health .pills');
-      if(pills){
-        const warn = pills.querySelector('.hpill.warn');
-        const info = pills.querySelector('.hpill.info');
-        if(warn){
-          if(n > 0){ warn.style.display=''; warn.textContent = n + ' affected · ' + (d.issues[0].service || 'service'); }
-          else warn.style.display = 'none';
-        }
-        if(info) info.textContent = (d.messageCenter || 0) + ' message center updates';
       }
     }).catch(()=>{});
   }
@@ -1261,9 +1108,13 @@
       if(kpi){
         const val = kpi.querySelector('.value'); if(val) val.textContent = d.expiring30;
         const note = kpi.querySelector('.note');
-        if(note) note.innerHTML = d.expiring30 > 0
-          ? '<span class="state bad">&#9679; action needed</span>'
-          : '<span class="state good">&#9679; all clear</span>';
+        const expired = d.expired || 0;
+        if(note){
+          if(d.expiring30 > 0 && expired > 0) note.innerHTML = '<span class="state bad">&#9679; action needed</span> <span class="cap" style="margin:0">&middot; '+expired+' already expired</span>';
+          else if(d.expiring30 > 0) note.innerHTML = '<span class="state bad">&#9679; action needed</span>';
+          else if(expired > 0) note.innerHTML = '<span class="state bad">&#9679; '+expired+' already expired</span>';
+          else note.innerHTML = '<span class="state good">&#9679; all clear</span>';
+        }
       }
     }).catch(()=>{});
   }
@@ -1342,7 +1193,9 @@
       const note = kpi.querySelector('.note');
       if(!d.hasCopilot){ if(val) val.textContent = 'n/a'; if(note) note.textContent = 'no Copilot licenses'; return; }
       if(val) val.textContent = d.pct + '%';
-      if(note) note.textContent = d.active + ' of ' + d.assigned + ' licenses used';
+      // "active" (used the report window) can exceed "assigned" (currently licensed) if a
+      // licence was removed mid-window — state them as two facts, never "150 of 120 used".
+      if(note) note.textContent = (d.active||0).toLocaleString() + ' active · ' + (d.assigned||0).toLocaleString() + ' licensed';
     }).catch(()=>{});
   }
 
@@ -1381,12 +1234,12 @@
     }).catch(()=>{ const card = cardByHeading('Workload activity'); if(card) renderWorkloadDonut(card, []); });
   }
 
-  function setGovRow(card, label, value, cls){
+  function setGovRow(card, label, value, cls, title){
     card.querySelectorAll('tbody tr').forEach(tr=>{
       const td = tr.querySelector('td');
       if(td && td.textContent.trim() === label){
         const tag = tr.querySelector('.tag');
-        if(tag){ tag.textContent = value; tag.className = 'tag ' + cls; }
+        if(tag){ tag.textContent = value; tag.className = 'tag ' + cls; if(title) tag.title = title; else tag.removeAttribute('title'); }
       }
     });
   }
@@ -1395,8 +1248,13 @@
       if(!d || d.error){ if(d && d.error) console.warn('governance:', d); return; }
       const card = cardByHeading('Governance watch');
       if(!card) return;
-      setGovRow(card, 'Ownerless Microsoft 365 groups', d.ownerless, d.ownerless>0?'warn':'good');
-      setGovRow(card, 'Empty groups', d.empty, d.empty>0?'warn':'good');
+      // when a tenant has more unified groups than the per-request cap, the ownerless/empty
+      // figures come from a sample — say so rather than implying full coverage.
+      const sampleNote = d.sampled ? ('Checked the first '+(d.analyzed||0).toLocaleString()+' of '+(d.groups||0).toLocaleString()+' groups') : '';
+      const cap = card.querySelector('.cap');
+      if(cap) cap.textContent = d.sampled ? sampleNote : 'Things that quietly become problems';
+      setGovRow(card, 'Ownerless Microsoft 365 groups', d.ownerless, d.ownerless>0?'warn':'good', sampleNote);
+      setGovRow(card, 'Empty groups', d.empty, d.empty>0?'warn':'good', sampleNote);
       setGovRow(card, 'Admin role holders', d.admins, 'good');
       // not available without extra tooling / licences - show a dash, not a fake number
       setGovRow(card, 'Sites sharing with anyone links', '—', 'good');
@@ -1432,15 +1290,17 @@
   function refreshAll(){
     METRICS = {};
     loadLive(); loadServiceHealth(); loadOrg(); loadUsers(); loadSecrets(); loadStorage(); loadCopilot(); loadWorkload(); loadGovernance(); loadSecureScore();
-    // record today's snapshot only once ALL key metrics have landed — a partial set would
-    // overwrite a complete row for the day and blank out those tiles' trend deltas.
+    // Record today's snapshot once all key metrics land, or after a timeout with whatever
+    // did land. The backend merges per-metric, so a partial post contributes the tiles that
+    // loaded without blanking the rest — a tenant missing one permission still gets trends
+    // for every metric it CAN read, instead of no trends at all.
     const need = ['unusedLicenses','serviceIssues','guests','secretsExpiring','storageGb','secureScorePct'];
     let waited = 0;
     const timer = setInterval(()=>{
       waited += 400;
       const have = need.filter(k => k in METRICS).length;
       if(have >= need.length){ clearInterval(timer); postSnapshot(); }
-      else if(waited >= 8000){ clearInterval(timer); renderTrends(); }   // timed out incomplete -> don't record, just show existing trends
+      else if(waited >= 8000){ clearInterval(timer); postSnapshot(); }   // timed out incomplete -> still record what landed (merged server-side)
     }, 400);
   }
 
@@ -1546,10 +1406,37 @@
     storage: {
       title: 'SharePoint sites',
       endpoint: '/api/storage',
+      note: d => d.concealed ? '<b>(root)</b> hides the real site URL &mdash; the report setting <b>"Display concealed names in all reports"</b> is on. Turn it off in <a href="https://admin.microsoft.com/#/Settings/Services/:/Settings/L1/Reports" target="_blank" rel="noopener">M365 admin &rarr; Org settings &rarr; Reports</a> for clickable site links here (~1&ndash;2 day lag after the change).' : null,
+      chart: d => {
+        const ts = (d.templateStorage||[]).filter(t=>(t.gb||0)>0);
+        if(!ts.length) return null;
+        const used = d.totalGB || ts.reduce((a,t)=>a+t.gb,0);
+        let thr={}; try{ thr=JSON.parse(localStorage.getItem('m365mon.thresholds')||'{}'); }catch{}
+        const quota = parseFloat(thr.quotaGb)||0, denom = quota>0 ? quota : used;
+        const top = ts.slice(0,6), otherGb = ts.slice(6).reduce((a,t)=>a+t.gb,0);
+        const segs = otherGb>0.005 ? top.concat([{template:'Other', gb:Math.round(otherGb*100)/100}]) : top;
+        const colors = ['#e8a33d','#f2c14e','#6264a7','#12a19a','#2f6fed','#c94f8a','#9aa0a6'];
+        const bar = segs.map((s,idx)=>{ const w = denom>0 ? Math.max(0,(s.gb/denom)*100) : 0;
+          return '<span class="tbar-seg" style="width:'+w.toFixed(2)+'%;background:'+colors[idx%colors.length]+'" title="'+escHtml(s.template)+': '+s.gb+' GB"></span>'; }).join('');
+        let legend = segs.map((s,idx)=> '<span class="tbar-item"><span class="tbar-dot" style="background:'+colors[idx%colors.length]+'"></span><b>'+escHtml(s.template)+'</b> <em>('+s.gb+' GB)</em></span>').join('');
+        let total;
+        if(quota > 0){
+          const free = Math.max(0, Math.round((quota - used) * 10) / 10);
+          legend += '<span class="tbar-item"><span class="tbar-dot tbar-free"></span><b>Free</b> <em>('+free+' GB)</em></span>';
+          const qd = quota >= 1048576 ? (parseFloat((quota/1048576).toFixed(2)) + ' PB')
+                   : quota >= 1024 ? (parseFloat((quota/1024).toFixed(2)) + ' TB')
+                   : (parseFloat(quota.toFixed(1)) + ' GB');
+          total = used.toFixed(1) + ' GB of ' + qd;
+        } else {
+          total = used.toFixed(1) + ' GB used &middot; <a href="#settings">set a total quota in Settings</a> to show free space';
+        }
+        return '<div class="tbar-row"><div class="tbar">'+bar+'</div><span class="tbar-used">'+total+'</span></div><div class="tbar-legend">'+legend+'</div>';
+      },
       rows: d => d.all || [],
       cols: [
-        { label:'Site', get:i=>i.url },
-        { label:'Template', get:i=>i.template },
+        { label:'Site', get:i=> i.webUrl ? relPath(i.webUrl) : i.url, link:i=>i.webUrl, w:300, sortVal:i=> i.webUrl ? relPath(i.webUrl) : i.url },
+        { label:'Owner', get:i=>i.owner || '', w:220 },
+        { label:'Template', get:i=>i.template, w:200 },
         { label:'Files', num:true, get:i=>i.files },
         { label:'Storage (GB)', num:true, get:i=>i.gb },
         { label:'Last activity', get:i=>i.last || '' }
@@ -1598,14 +1485,20 @@
     const cfg = AREAS[area];
     document.getElementById('listTitle').textContent = cfg ? cfg.title : area;
     document.getElementById('listSearch').value = '';
-    const head = document.getElementById('listHead'), body = document.getElementById('listBody'), pager = document.getElementById('listPager');
+    const head = document.getElementById('listHead'), body = document.getElementById('listBody'), pager = document.getElementById('listPager'), note = document.getElementById('listNote'), chart = document.getElementById('listChart');
     if(pager) pager.innerHTML = '';
+    if(note){ note.hidden = true; note.innerHTML = ''; }
+    if(chart){ chart.hidden = true; chart.innerHTML = ''; }
     if(!cfg){ head.innerHTML=''; body.innerHTML = '<tr><td>Coming soon</td></tr>'; return; }
     // render the correct columns immediately so the loading state matches the title
     head.innerHTML = headHtml(cfg, null, true);
     body.innerHTML = '<tr><td colspan="'+cfg.cols.length+'">Loading…</td></tr>';
     fetch(cfg.endpoint).then(r=>r.json()).then(d=>{
       listState = { cfg, data: cfg.rows(d).slice(), sortCol:null, sortAsc:true, page:1, filtered:[] };
+      const n = cfg.note && cfg.note(d);
+      if(note && n){ note.innerHTML = n; note.hidden = false; }
+      const ch = cfg.chart && cfg.chart(d);
+      if(chart && ch){ chart.innerHTML = ch; chart.hidden = false; }
       renderList();
     }).catch(()=>{ body.innerHTML = '<tr><td>Could not load</td></tr>'; });
   }
@@ -1633,7 +1526,10 @@
       if(c.num) return '<td class="r tnum">'+Number(v).toLocaleString()+'</td>';
       if(c.tag){ const t=c.tag(i); const ev=escHtml(v); return '<td>'+(t?'<span class="tag '+t+'">'+ev+'</span>':ev)+'</td>'; }
       const sv = escHtml(v);
-      return '<td><span class="cell-ell" title="'+sv+'">'+sv+'</span></td>';
+      const href = c.link && c.link(i);
+      const inner = href ? '<a href="'+escHtml(href)+'" target="_blank" rel="noopener">'+sv+'</a>' : sv;
+      const wStyle = c.w ? ' style="max-width:'+c.w+'px"' : '';
+      return '<td><span class="cell-ell"'+wStyle+' title="'+sv+'">'+inner+'</span></td>';
     }).join('')+'</tr>').join('') : '<tr><td>No items</td></tr>';
     if(pager){
       if(total <= ps){
@@ -1762,7 +1658,11 @@
     try { const t = JSON.parse(localStorage.getItem(THR_KEY) || '{}');
       if(t.secretDays) document.getElementById('thrSecretDays').value = t.secretDays;
       if(t.storagePct) document.getElementById('thrStoragePct').value = t.storagePct;
-      if(t.quotaGb) document.getElementById('thrQuotaGb').value = t.quotaGb;
+      if(t.quotaGb){
+        const gb = parseFloat(t.quotaGb), unit = gb >= 1048576 ? 1048576 : (gb >= 1024 ? 1024 : 1);
+        document.getElementById('thrQuotaUnit').value = String(unit);
+        document.getElementById('thrQuotaVal').value = Math.round(gb / unit * 100) / 100;
+      }
     } catch {}
   }
   const sr = document.getElementById('saveRates');
@@ -1775,7 +1675,8 @@
   });
   const stx = document.getElementById('saveThr');
   if(stx) stx.addEventListener('click', ()=>{
-    const t = { secretDays: parseInt(document.getElementById('thrSecretDays').value)||30, storagePct: parseInt(document.getElementById('thrStoragePct').value)||80, quotaGb: parseFloat(document.getElementById('thrQuotaGb').value)||0 };
+    const qv = parseFloat(document.getElementById('thrQuotaVal').value)||0, qu = parseFloat(document.getElementById('thrQuotaUnit').value)||1;
+    const t = { secretDays: parseInt(document.getElementById('thrSecretDays').value)||30, storagePct: parseInt(document.getElementById('thrStoragePct').value)||80, quotaGb: Math.round(qv * qu * 100) / 100 };
     localStorage.setItem(THR_KEY, JSON.stringify(t));
     const m = document.getElementById('saveThrMsg'); if(m){ m.textContent = 'Saved'; setTimeout(()=>m.textContent='', 1500); }
     loadStorage();
@@ -1787,6 +1688,8 @@
   let orgNames = {};   // tenantId -> friendly org name from /api/org (takes priority over the profile label)
   let activeOrgName = '';   // current active tenant's org name, id-independent so a load race can't drop it
   function escHtml(s){ return String(s==null?'':s).replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+  // Shorten a full SharePoint URL to its server-relative path: "/sites/PSDemo", "/SiteName", or "/" for the root site
+  function relPath(u){ try{ const p = new URL(u).pathname; return p && p !== '/' ? decodeURIComponent(p) : '/'; }catch{ return u; } }
   function activeTenant(){ return (tenantsCache.tenants||[]).find(t=>t.id===tenantsCache.activeId) || null; }
   function pillName(){ const id = tenantsCache.activeId, a = activeTenant(); return activeOrgName || (id && orgNames[id]) || (a && a.label) || 'No tenant'; }
   function updatePill(){ const l = document.getElementById('tswLabel'); if(l) l.textContent = pillName(); }
@@ -1848,14 +1751,16 @@
     document.getElementById('cfgLabel').value = t.label||'';
     document.getElementById('cfgTenant').value = t.tenantId||'';
     document.getElementById('cfgClient').value = t.clientId||'';
-    const s = document.getElementById('cfgSecret'); s.value=''; s.placeholder = t.hasSecret ? 'secret is set — leave blank to keep' : 'Client secret value';
+    const s = document.getElementById('cfgSecret'); s.value=''; s.placeholder = 'Client secret value'; maskSecret();
+    if(t.hasSecret) fetch('/api/tenants/'+encodeURIComponent(id)+'/secret').then(r=>r.json()).then(d=>{ if(d && d.ok && d.clientSecret) s.value = d.clientSecret; }).catch(()=>{});
     const ft = document.getElementById('cfgFormTitle'); if(ft) ft.textContent = 'Edit "'+t.label+'"';
     const msg = document.getElementById('cfgMsg'); if(msg){ msg.textContent=''; }
     document.getElementById('cfgLabel').focus();
   }
+  function maskSecret(){ const s=document.getElementById('cfgSecret'), e=document.getElementById('cfgSecretEye'); if(s) s.type='password'; if(e){ e.classList.remove('on'); e.title='Show secret'; } }
   function resetCfgForm(){
     ['cfgId','cfgLabel','cfgTenant','cfgClient','cfgSecret'].forEach(i=>{ const el=document.getElementById(i); if(el) el.value=''; });
-    const s = document.getElementById('cfgSecret'); if(s) s.placeholder='Client secret value';
+    const s = document.getElementById('cfgSecret'); if(s) s.placeholder='Client secret value'; maskSecret();
     const ft = document.getElementById('cfgFormTitle'); if(ft) ft.textContent='Add a tenant';
     const msg = document.getElementById('cfgMsg'); if(msg) msg.textContent='';
   }
@@ -1885,6 +1790,14 @@
   });
   const cfgResetBtn = document.getElementById('cfgReset');
   if(cfgResetBtn) cfgResetBtn.addEventListener('click', resetCfgForm);
+  const cfgSecretEye = document.getElementById('cfgSecretEye');
+  if(cfgSecretEye) cfgSecretEye.addEventListener('click', ()=>{
+    const s = document.getElementById('cfgSecret'); if(!s) return;
+    const show = s.type === 'password';
+    s.type = show ? 'text' : 'password';
+    cfgSecretEye.classList.toggle('on', show);
+    cfgSecretEye.title = show ? 'Hide secret' : 'Show secret';
+  });
   const tswBtn = document.getElementById('tswBtn');
   if(tswBtn) tswBtn.addEventListener('click', (e)=>{ e.stopPropagation(); toggleTswMenu(); });
   document.addEventListener('click', (e)=>{ const sw=document.getElementById('tenantSwitch'); if(sw && !sw.contains(e.target)) toggleTswMenu(false); });

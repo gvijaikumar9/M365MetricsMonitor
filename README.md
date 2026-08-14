@@ -95,8 +95,9 @@ Open **Settings** to:
 
 - enter a **monthly cost per licence** (Microsoft Graph does not expose prices), so
   the Unused Licences tile shows real idle spend,
-- enter your **total SharePoint storage quota** (Graph does not expose it app-only;
-  find it in the SharePoint admin center) to drive the storage bar,
+- enter your **total SharePoint storage quota** in **GB, TB or PB** (Graph does not
+  expose it app-only; find it in the SharePoint admin center) to drive the storage bar
+  and its free-space figures,
 - set **alert thresholds** used to highlight tiles.
 
 These are stored in your browser. The theme (light/dark) is remembered too.
@@ -107,12 +108,27 @@ On the Overview, hover a card and drag its **top-left handle** to rearrange it (
 with mouse and touch). The arrangement is saved for the active tenant. A **Reset
 layout** button appears in the top bar once you have changed the order.
 
+## Full lists and export
+
+Click any tile (or a left-nav item) to open the full list behind it - sortable
+columns, a filter box, paging and **Export CSV**. On the SharePoint list, if your
+tenant hides site URLs (the "Display concealed names in reports" privacy setting) a
+note explains it and links straight to the setting; turn it off and real site URLs
+become clickable links.
+
+## Updates
+
+The version button at the bottom-left checks GitHub for newer releases and shows a
+download link when one exists. The tool never auto-updates.
+
 ## Security
 
 Your client secrets live in `tenants.json` (and `appsettings.json` if you seed one
 there). Both are **git-ignored** - never commit them. Ship `appsettings.example.json`
-(placeholders) instead. The secret is never shown back in the UI or sent anywhere but
-Microsoft Graph. If a secret ever leaks, rotate it in the app registration.
+(placeholders) instead. A secret is only ever shown back **masked** (with an eye toggle
+to reveal it) when you edit that tenant; it stays on this machine and is sent nowhere but
+Microsoft Graph. The dashboard binds to `localhost` only and rejects cross-origin
+requests. If a secret ever leaks, rotate it in the app registration.
 
 ## Build a single-file release
 

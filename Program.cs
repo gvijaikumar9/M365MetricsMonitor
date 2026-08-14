@@ -162,6 +162,14 @@ app.MapDelete("/api/tenants/{id}", (string id) =>
     return Results.Json(new { ok = true });
 });
 
+// Return a saved tenant's secret for editing. Only reachable from the local UI (the Host/Origin
+// guard blocks cross-origin/remote callers); the secret already lives in plaintext in tenants.json.
+app.MapGet("/api/tenants/{id}/secret", (string id) =>
+{
+    var p = tenants.FirstOrDefault(t => t.Id == id);
+    return p is null ? Results.Json(new { ok = false }) : Results.Json(new { ok = true, clientSecret = p.ClientSecret });
+});
+
 // Record today's metrics for the active tenant (upsert one row per UTC day).
 app.MapPost("/api/snapshot", (SnapshotDto body) =>
 {
@@ -170,7 +178,15 @@ app.MapPost("/api/snapshot", (SnapshotDto body) =>
     var today = DateTimeOffset.UtcNow.ToString("yyyy-MM-dd");
     if (!snaps.TryGetValue(activeTenantId, out var list)) { list = new(); snaps[activeTenantId] = list; }
     var existing = list.FirstOrDefault(s => s.date == today);
-    if (existing is not null) list[list.IndexOf(existing)] = new Snapshot(today, body.metrics);
+    if (existing is not null)
+    {
+        // Merge per-metric rather than replacing the whole row. A partial refresh (some
+        // tiles missing a permission, or a slow Graph call) then still contributes the
+        // metrics that landed without blanking ones captured earlier the same day.
+        var merged = new Dictionary<string, double?>(existing.metrics);
+        foreach (var kv in body.metrics) merged[kv.Key] = kv.Value;
+        list[list.IndexOf(existing)] = new Snapshot(today, merged);
+    }
     else list.Add(new Snapshot(today, body.metrics));
     if (list.Count > 400) list.RemoveRange(0, list.Count - 400);   // keep ~1 year
     SaveSnaps();
@@ -378,11 +394,14 @@ app.MapGet("/api/secrets", async () =>
             if (string.IsNullOrEmpty(next) || ++pages >= 200) break;
             resp = await G().Applications.WithUrl(next).GetAsync();
         }
-        var expiring30 = raw.Count(x => x.days <= 30);
+        // Keep "expiring soon" (0-30 days out) distinct from "already expired" (past due) so
+        // a credential that lapsed years ago doesn't inflate the "expiring ≤ 30d" urgency count.
+        var expiring30 = raw.Count(x => x.days >= 0 && x.days <= 30);
+        var expired = raw.Count(x => x.days < 0);
         // full list, sorted soonest first (the tile slices; the "View all" page shows everything)
         var items = raw.OrderBy(x => x.days)
             .Select(x => new { app = x.app, appId = x.appId, type = x.type, days = x.days }).ToList();
-        return Results.Json(new { expiring30, items });
+        return Results.Json(new { expiring30, expired, items });
     }
     catch (Exception ex) { return Results.Json(new { error = "graph_error", message = Describe(ex) }); }
 });
@@ -445,11 +464,12 @@ app.MapGet("/api/storage", async () =>
         var header = rows[0];
         int Col(string name) => Array.FindIndex(header, h => h.Trim().Equals(name, StringComparison.OrdinalIgnoreCase));
         int cUrl = Col("Site URL"), cStore = Col("Storage Used (Byte)"), cTmpl = Col("Root Web Template"),
-            cFiles = Col("File Count"), cLast = Col("Last Activity Date");
+            cFiles = Col("File Count"), cLast = Col("Last Activity Date"), cOwner = Col("Owner Display Name");
 
         long totalBytes = 0;
         var byTemplate = new Dictionary<string, int>();
-        var sites = new List<(string url, string tmpl, long bytes, long files, string last)>();
+        var byTemplateBytes = new Dictionary<string, long>();
+        var sites = new List<(string url, string owner, string tmpl, long bytes, long files, string last)>();
         foreach (var r in rows.Skip(1))
         {
             if (cStore < 0 || r.Length <= cStore) continue;
@@ -457,15 +477,19 @@ app.MapGet("/api/storage", async () =>
             totalBytes += bytes;
             var tmpl = cTmpl >= 0 && cTmpl < r.Length ? r[cTmpl] : "";
             byTemplate[tmpl] = byTemplate.GetValueOrDefault(tmpl) + 1;
+            byTemplateBytes[tmpl] = byTemplateBytes.GetValueOrDefault(tmpl) + bytes;
             var siteUrl = cUrl >= 0 && cUrl < r.Length ? r[cUrl] : "";
+            var owner = cOwner >= 0 && cOwner < r.Length ? r[cOwner] : "";
             long files = cFiles >= 0 && cFiles < r.Length && long.TryParse(r[cFiles], out var f) ? f : 0;
             var last = cLast >= 0 && cLast < r.Length ? r[cLast] : "";
-            sites.Add((siteUrl, tmpl, bytes, files, last));
+            sites.Add((siteUrl, owner, tmpl, bytes, files, last));
         }
         var top = sites.OrderByDescending(s => s.bytes).Take(5)
             .Select(s => new
             {
                 url = SiteName(s.url),
+                webUrl = s.url,
+                owner = s.owner,
                 template = FriendlyTemplate(s.tmpl),
                 files = s.files,
                 gb = Math.Round(s.bytes / 1073741824.0, 1),
@@ -475,6 +499,8 @@ app.MapGet("/api/storage", async () =>
             .Select(s => new
             {
                 url = SiteName(s.url),
+                webUrl = s.url,
+                owner = s.owner,
                 template = FriendlyTemplate(s.tmpl),
                 files = s.files,
                 gb = Math.Round(s.bytes / 1073741824.0, 2),
@@ -482,8 +508,12 @@ app.MapGet("/api/storage", async () =>
             }).ToList();
         var templates = byTemplate.OrderByDescending(kv => kv.Value).Take(6)
             .Select(kv => new { template = FriendlyTemplate(kv.Key), count = kv.Value }).ToList();
+        var templateStorage = byTemplateBytes.OrderByDescending(kv => kv.Value)
+            .Select(kv => new { template = FriendlyTemplate(kv.Key), gb = Math.Round(kv.Value / 1073741824.0, 2) }).ToList();
         double totalGB = Math.Round(totalBytes / 1073741824.0, 1);
-        return Results.Json(new { totalSites = sites.Count, totalGB, totalTB = Math.Round(totalGB / 1024.0, 2), templates, top, all });
+        // Report anonymises the Site URL when the tenant's "Display concealed names in reports" setting is on.
+        bool concealed = sites.Count > 0 && sites.All(s => string.IsNullOrEmpty(s.url));
+        return Results.Json(new { totalSites = sites.Count, totalGB, totalTB = Math.Round(totalGB / 1024.0, 2), templates, templateStorage, top, all, concealed });
     }
     catch (Exception ex) { return Results.Json(new { error = "graph_error", message = Describe(ex) }); }
 });
@@ -528,12 +558,24 @@ app.MapGet("/api/workload", async () =>
         var rows = ParseCsv(csv);
         if (rows.Count < 2) return Results.Json(new { error = "no_data" });
         var header = rows[0];
+        int Col(string name) => Array.FindIndex(header, h => h.Trim().Equals(name, StringComparison.OrdinalIgnoreCase));
+        int Cell(string[] row, int i) => i >= 0 && i < row.Length && int.TryParse(row[i], out var v) ? v : 0;
+        int teamsC = Col("Teams Active"), spC = Col("SharePoint Active"), exC = Col("Exchange Active"), odC = Col("OneDrive Active");
+        int dateC = Col("Report Date"); if (dateC < 0) dateC = Col("Report Refresh Date");
+        // This report is a per-day time series; use the most recent day that actually has
+        // counts (the latest day or two can be blank because usage data lags ~1-2 days),
+        // rather than trusting the CSV row order.
         var data = rows[1];
-        int Get(string name)
+        DateTime best = DateTime.MinValue; bool picked = false;
+        for (int r = 1; r < rows.Count; r++)
         {
-            var i = Array.FindIndex(header, h => h.Trim().Equals(name, StringComparison.OrdinalIgnoreCase));
-            return i >= 0 && i < data.Length && int.TryParse(data[i], out var v) ? v : 0;
+            var row = rows[r];
+            if (Cell(row, teamsC) + Cell(row, spC) + Cell(row, exC) + Cell(row, odC) == 0) continue;
+            if (dateC >= 0 && dateC < row.Length && DateTime.TryParse(row[dateC], out var dt))
+            { if (dt >= best) { best = dt; data = row; picked = true; } }
+            else if (!picked) { data = row; picked = true; }
         }
+        int Get(string name) { var i = Col(name); return i >= 0 && i < data.Length && int.TryParse(data[i], out var v) ? v : 0; }
         var items = new[]
         {
             new { service = "Teams",      active = Get("Teams Active") },
@@ -571,7 +613,8 @@ app.MapGet("/api/governance", async () =>
 
         // Owner/member checks are 2 calls per group; bound concurrency so a large tenant can't
         // burst Graph into 429s, and cap the analysed set so the tile stays responsive.
-        var toCheck = unifiedAll.Take(500).ToList();
+        const int GovSampleCap = 500;
+        var toCheck = unifiedAll.Take(GovSampleCap).ToList();
         using var gate = new SemaphoreSlim(8);
         var checks = await Task.WhenAll(toCheck.Select(async g =>
         {
@@ -603,7 +646,10 @@ app.MapGet("/api/governance", async () =>
             }
         }
 
-        return Results.Json(new { groups = unifiedAll.Count, ownerless, empty, admins = admins.Count });
+        // analyzed/sampled let the UI say the ownerless/empty figures come from a sample when a
+        // tenant has more unified groups than the per-request cap, instead of implying full coverage.
+        return Results.Json(new { groups = unifiedAll.Count, ownerless, empty, admins = admins.Count,
+                                  analyzed = toCheck.Count, sampled = unifiedAll.Count > toCheck.Count });
     }
     catch (Exception ex) { return Results.Json(new { error = "graph_error", message = Describe(ex) }); }
 });
