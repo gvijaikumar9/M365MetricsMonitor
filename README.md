@@ -11,6 +11,8 @@ service health, licences, storage, secrets, users, security and governance in on
 place, so you do not have to click through five different admin portals. To *act* on
 anything, you still use the Microsoft admin center.
 
+![The M365 Metrics Monitor dashboard: service health, licences, storage, secrets, Copilot, workload activity and Secure Score on one screen](docs/screenshots/dashboard-overview.png)
+
 ## What it shows
 
 - **Service health** and the actual named advisories/incidents (by severity)
@@ -73,8 +75,18 @@ you grant.
    Click **Save & connect**. Use **Check permissions** to confirm every scope is
    granted; it flags which tiles will not work if any is missing.
 
+Grant tenant-wide admin consent to the app:
+
+![Granting tenant-wide admin consent to the M365 Metrics Monitor app](docs/screenshots/admin-consent.png)
+
+The six Application Graph permissions on the app registration, all granted:
+
+![The six Application Microsoft Graph permissions on the app registration, all granted](docs/screenshots/api-permissions.png)
+
 The **Help** icon (top right) has these same steps inside the app for first-time
 users.
+
+![The in-app Help panel with the same first-time setup steps](docs/screenshots/help.png)
 
 ### Optional (extended)
 
@@ -102,6 +114,8 @@ Open **Settings** to:
 
 These are stored in your browser. The theme (light/dark) is remembered too.
 
+![Settings: tenant connections with a masked secret reveal, per-SKU cost rates, and alert thresholds with a GB/TB/PB storage quota](docs/screenshots/settings.png)
+
 ## Rearranging the dashboard
 
 On the Overview, hover a card and drag its **top-left handle** to rearrange it (works
@@ -115,6 +129,8 @@ columns, a filter box, paging and **Export CSV**. On the SharePoint list, if you
 tenant hides site URLs (the "Display concealed names in reports" privacy setting) a
 note explains it and links straight to the setting; turn it off and real site URLs
 become clickable links.
+
+![The SharePoint sites list: storage-by-template bar, sortable columns, filter and Export CSV](docs/screenshots/sharepoint-sites.png)
 
 ## Updates
 
