@@ -7,7 +7,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%233f51d6'/><rect x='8' y='16' width='4' height='8' rx='1.5' fill='white'/><rect x='14' y='11' width='4' height='13' rx='1.5' fill='white'/><rect x='20' y='7' width='4' height='17' rx='1.5' fill='white'/></svg>">
 <style>
   :root{
-    --bg:#eef1f8; --surface:#ffffff; --surface-2:#f7f9fc; --border:#e2e7f1;
+    --bg:#eef1f8; --surface:#ffffff; --surface-2:#f7f9fc; --border:#e2e7f1; --suitebar:#26262e;
     --text:#182031; --muted:#5c6779; --faint:#8a94a6;
     --accent:#3f51d6; --accent-soft:#eaecfb;
     --good:#1a9d6a; --good-soft:#e3f5ec;
@@ -20,7 +20,7 @@
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
       /* VS Code dark palette — matches the Microsoft Search Query Tool */
-      --bg:#1e1e1e; --surface:#252526; --surface-2:#2d2d30; --border:#3c3c3c;
+      --bg:#1e1e1e; --surface:#252526; --surface-2:#2d2d30; --border:#3c3c3c; --suitebar:#141414;
       --text:#d4d4d4; --muted:#9a9a9a; --faint:#6e7681;
       --accent:#3794ff; --accent-soft:#14314f;
       --good:#4ec9b0; --good-soft:#123029;
@@ -33,7 +33,7 @@
   }
   :root[data-theme="dark"]{
     /* VS Code dark palette — matches the Microsoft Search Query Tool */
-    --bg:#1e1e1e; --surface:#252526; --surface-2:#2d2d30; --border:#3c3c3c;
+    --bg:#1e1e1e; --surface:#252526; --surface-2:#2d2d30; --border:#3c3c3c; --suitebar:#141414;
     --text:#d4d4d4; --muted:#9a9a9a; --faint:#6e7681;
     --accent:#3794ff; --accent-soft:#14314f;
     --good:#4ec9b0; --good-soft:#123029;
@@ -213,7 +213,7 @@
   a{color:var(--accent)}
   /* app shell */
   /* M365-style suite bar */
-  .suitebar{position:sticky; top:0; z-index:30; display:flex; align-items:center; gap:12px; height:48px; padding:0 12px; background:#26262e; color:#fff}
+  .suitebar{position:sticky; top:0; z-index:30; display:flex; align-items:center; gap:12px; height:48px; padding:0 12px; background:var(--suitebar); color:#fff}
   .suitebar .spacer{flex:1}
   .waffle{background:none; border:none; color:#fff; cursor:pointer; padding:6px; border-radius:6px; display:grid; place-items:center; opacity:.92}
   .waffle:hover{background:rgba(255,255,255,.14); opacity:1}
@@ -224,7 +224,11 @@
   .suite-btn svg{width:18px; height:18px}
   .upd-pill{align-items:center; gap:5px; background:var(--good); color:#fff; text-decoration:none; font-size:12px; font-weight:600; padding:4px 11px; border-radius:999px; cursor:pointer; white-space:nowrap}
   .upd-pill:hover{filter:brightness(1.1)}
-  .help-ver{display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:22px; padding-top:16px; border-top:1px solid var(--border); font-size:12.5px; color:var(--faint)}
+  .side-ver{display:flex; flex-direction:column; gap:6px; margin-bottom:2px}
+  .side-upd{color:var(--accent)}
+  .side-ver .upd-status{font-size:11px; line-height:1.4; text-align:center; color:var(--faint)}
+  .side-ver .upd-status a{color:var(--accent); font-weight:700; text-decoration:none; white-space:nowrap}
+  .side-ver .upd-status a:hover{text-decoration:underline}
   .suite-reset{display:flex; align-items:center; gap:6px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); color:#fff; cursor:pointer; padding:6px 12px; border-radius:999px; font-size:12.5px; opacity:.95}
   .suite-reset:hover{background:rgba(255,255,255,.16); opacity:1}
   .suite-reset svg{width:14px; height:14px; flex:none}
@@ -278,11 +282,13 @@
   .side-bottom{margin-top:auto; display:flex; flex-direction:column; gap:8px}
   .side-foot{display:flex; align-items:center; gap:10px; border:1px solid var(--border); background:var(--surface); color:var(--muted); border-radius:9px; padding:9px 12px; font-size:12.5px; font-weight:600; cursor:pointer; white-space:nowrap}
   .side-foot svg{width:16px; height:16px; flex:none}
-  .side-foot:hover{border-color:var(--accent); color:var(--accent)}
+  .side-foot:hover{border-color:var(--accent)}
+  .side-blog{color:var(--accent); text-decoration:none}
   /* collapsed sidebar */
   .app.collapsed{grid-template-columns:66px 1fr}
   .app.collapsed .nav-item span, .app.collapsed .side-foot .lbl{display:none}
   .app.collapsed .nav-item, .app.collapsed .side-foot{justify-content:center; padding:9px}
+  .app.collapsed .upd-status{display:none}
   .app.collapsed .side-logo{display:none}
   .app.collapsed .side-top{justify-content:center; margin-left:0; margin-right:0}
   .main{min-width:0; padding:22px 28px 48px}
@@ -318,8 +324,12 @@
   .page{max-width:1240px}
   .page[hidden]{display:none}
   .stub{background:var(--surface); border:1px dashed var(--border); border-radius:14px; padding:44px; text-align:center; color:var(--muted); font-size:14px; max-width:640px}
-  .settings-card{max-width:640px; margin-bottom:16px}
+  .settings-card{max-width:none; margin-bottom:16px; padding:24px 26px}
+  .tenants-card{display:grid; grid-template-columns:1fr 1fr; gap:28px; align-items:start}
+  .tenants-card .tc-right{border-left:1px solid var(--border); padding-left:28px}
+  @media(max-width:820px){ .tenants-card{grid-template-columns:1fr; gap:18px} .tenants-card .tc-right{border-left:none; padding-left:0} }
   .rate-rows,.thr-rows{display:flex; flex-direction:column; gap:8px; margin:10px 0 14px}
+  .rate-rows{max-width:520px}
   .rate-rows .rate{display:grid; grid-template-columns:1fr 130px; align-items:center; gap:10px}
   .rate-rows .rate span{font-size:13px}
   .rate-rows input,.thr-rows input{width:120px; padding:6px 8px; border:1px solid var(--border); border-radius:7px; background:var(--surface-2); color:var(--text); font-size:13px}
@@ -328,9 +338,19 @@
   .btn.primary{background:var(--accent); color:#fff; border-color:var(--accent)}
   .btn.primary:hover{filter:brightness(1.06); color:#fff}
   .save-msg{font-size:12px; color:var(--good); font-weight:600}
-  .conn-rows{display:flex; flex-direction:column; gap:10px; margin:10px 0 14px; max-width:520px}
+  .conn-rows{display:grid; grid-template-columns:1fr 1fr; gap:12px 14px; margin:10px 0 14px}
   .conn-rows label{display:flex; flex-direction:column; gap:4px; font-size:12.5px; color:var(--muted)}
+  .conn-rows label.full{grid-column:1 / -1}
   .conn-rows input{padding:8px 10px; border:1px solid var(--border); border-radius:8px; background:var(--surface-2); color:var(--text); font-size:13px}
+  @media(max-width:600px){ .conn-rows{grid-template-columns:1fr} }
+  /* settings card headers with a tinted icon */
+  .sc-head{display:flex; align-items:center; gap:12px; margin-bottom:6px}
+  .sc-head h3{margin:0}
+  .sc-icon{width:40px; height:40px; border-radius:11px; display:grid; place-items:center; flex:none}
+  .sc-icon svg{width:20px; height:20px}
+  .sc-icon.tenants{background:var(--accent-soft); color:var(--accent)}
+  .sc-icon.cost{background:var(--good-soft); color:var(--good)}
+  .sc-icon.alert{background:var(--warn-soft); color:var(--warn)}
   .perm-result{margin-top:14px; display:flex; flex-direction:column; gap:7px}
   .perm-row{display:flex; align-items:center; gap:10px; font-size:13px}
   .perm-row .pi{width:18px; height:18px; flex:none; display:grid; place-items:center; border-radius:50%; font-size:11px; font-weight:800}
@@ -349,12 +369,22 @@
   .listhead{display:flex; align-items:center; gap:14px; margin-bottom:16px; flex-wrap:wrap}
   .listhead h2{margin:0; font-size:18px; font-weight:700}
   #listSearch{margin-left:auto; padding:8px 12px; border:1px solid var(--border); border-radius:9px; background:var(--surface); color:var(--text); font-size:13px; min-width:220px}
+  #page-list .card{padding:14px 24px 18px}
   .listwrap{overflow-x:auto}
   .listtable{width:100%; border-collapse:collapse; font-size:13px}
-  .listtable th{text-align:left; color:var(--faint); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.4px; padding:8px; border-bottom:1px solid var(--border); cursor:pointer; white-space:nowrap; user-select:none}
-  .listtable th:hover{color:var(--accent)}
-  .listtable td{padding:9px 8px; border-bottom:1px solid var(--border)}
+  .listtable th{text-align:left; color:var(--faint); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.4px; padding:8px; border-bottom:1px solid var(--border); white-space:nowrap; user-select:none}
+  .listtable th.sortable{cursor:pointer}
+  .listtable th.sortable:hover{color:var(--accent)}
+  .listtable th.sorted{color:var(--accent)}
+  .sort-ico{display:inline-flex; vertical-align:middle; margin-left:5px; opacity:.35}
+  .sort-ico svg{width:12px; height:12px}
+  .listtable th.sortable:hover .sort-ico{opacity:.7}
+  .listtable th.sorted .sort-ico{opacity:1}
+  .listtable td{padding:9px 8px; border-bottom:1px solid var(--border); vertical-align:middle}
   .listtable tbody tr:hover td{background:var(--surface-2)}
+  /* long text: cap the column and truncate with an ellipsis (full value on hover + in CSV) */
+  .cell-ell{display:block; max-width:340px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .listtable .tag{white-space:nowrap}
   .listtable a{color:var(--accent); text-decoration:none}
   .listpager{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:12px 8px 2px; font-size:12.5px; color:var(--muted)}
   .listpager:empty{display:none}
@@ -417,7 +447,12 @@
       <a class="nav-item" data-page="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg><span>Settings</span></a>
     </nav>
     <div class="side-bottom">
+      <div class="side-ver">
+        <span id="updStatus" class="upd-status"></span>
+        <button class="side-foot side-upd" id="checkUpdBtn" type="button" title="Check for updates"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V8M6 14l6-6 6 6"/><path d="M6 4h12"/></svg><span id="updVer" class="lbl">v0.2.0 upgrade</span></button>
+      </div>
       <button class="side-foot" id="feedbackBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="lbl">Give feedback</span></button>
+      <a class="side-foot side-blog" href="https://www.fivenumber.com/" target="_blank" rel="noopener" title="fivenumber.com"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg><span class="lbl">fivenumber.com</span></a>
     </div>
   </aside>
 
@@ -839,17 +874,20 @@
     </section>
 
     <section class="page" id="page-settings" hidden>
-      <div class="card settings-card">
-        <h3>Tenants</h3>
+      <div class="card settings-card tenants-card">
+        <div class="tc-left">
+        <div class="sc-head"><span class="sc-icon tenants"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="1.5"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M12 6h.01M16 6h.01M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01"/></svg></span><h3>Tenants</h3></div>
         <p class="cap">Save one or more tenant connections (Entra app registrations) and switch between them from the top bar. Values are saved to a local file on this machine.</p>
         <div id="tenantList" class="tenant-list"></div>
+        </div>
+        <div class="tc-right">
         <h4 class="conn-sub" id="cfgFormTitle">Add a tenant</h4>
         <div class="conn-rows">
           <input type="hidden" id="cfgId">
-          <label>Label <input id="cfgLabel" placeholder="e.g. Contoso Production"></label>
+          <label class="full">Label <input id="cfgLabel" placeholder="e.g. Contoso Production"></label>
           <label>Tenant ID <input id="cfgTenant" placeholder="Directory (tenant) ID"></label>
           <label>Client ID <input id="cfgClient" placeholder="Application (client) ID"></label>
-          <label>Client Secret <input id="cfgSecret" type="password" placeholder="Client secret value"></label>
+          <label class="full">Client Secret <input id="cfgSecret" type="password" placeholder="Client secret value"></label>
         </div>
         <div class="settings-actions">
           <button class="btn primary" id="saveConfig">Save &amp; connect</button>
@@ -858,9 +896,10 @@
           <span id="cfgMsg" class="save-msg"></span>
         </div>
         <div id="permResult" class="perm-result"></div>
+        </div>
       </div>
       <div class="card settings-card">
-        <h3>License cost rates</h3>
+        <div class="sc-head"><span class="sc-icon cost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 11v6M9.5 12.5h3.5a1.5 1.5 0 0 1 0 3h-2a1.5 1.5 0 0 0 0 3H14"/></svg></span><h3>License cost rates</h3></div>
         <p class="cap">Microsoft Graph does not expose prices. Enter your monthly cost per licence and the Unused Licenses tile shows real idle spend. Stored in this browser.</p>
         <div id="rateRows" class="rate-rows"></div>
         <div class="settings-actions">
@@ -869,7 +908,7 @@
         </div>
       </div>
       <div class="card settings-card">
-        <h3>Alert thresholds</h3>
+        <div class="sc-head"><span class="sc-icon alert"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></span><h3>Alert thresholds</h3></div>
         <p class="cap">Stored locally, used to highlight tiles.</p>
         <div class="thr-rows">
           <label>Warn when a secret expires within <input type="number" id="thrSecretDays" min="1" value="30"> days</label>
@@ -945,11 +984,6 @@
       <h3>Rearranging &amp; secrets</h3>
       <p>On the Overview, hover a card and drag its top-left handle to rearrange; a <b>Reset layout</b> button appears in the top bar once you&rsquo;ve changed the order. Your client secret is stored only on this machine and is never displayed back or sent anywhere but Microsoft Graph.</p>
 
-      <div class="help-ver">
-        <span id="verLine">Version&hellip;</span>
-        <button class="btn" id="checkUpdBtn" type="button">Check for updates</button>
-        <span id="updStatus" class="save-msg"></span>
-      </div>
     </div>
   </div>
 </div>
@@ -1036,12 +1070,12 @@
     const pill = document.getElementById('updPill'), status = document.getElementById('updStatus');
     if(manual && status){ status.style.color = 'var(--muted)'; status.textContent = 'Checking…'; }
     fetch('/api/update-check').then(r=>r.json()).then(d=>{
-      const v = document.getElementById('verLine'); if(v) v.textContent = 'Version ' + (d.current || '?');
+      const vb = document.getElementById('updVer'); if(vb) vb.textContent = 'v' + (d.current || '?') + ' upgrade';
       if(pill && d.updateAvailable && d.latest){
         pill.textContent = '↑ Update available: ' + d.latest;
         pill.href = d.url; pill.title = 'A newer version is on GitHub — click to view the release';
         pill.style.display = 'inline-flex';
-        if(status) status.textContent = '';
+        if(status){ status.style.color = 'var(--accent)'; status.innerHTML = 'New ' + escHtml(d.latest) + ' available &mdash; <a href="' + d.url + '" target="_blank" rel="noopener">Download &rarr;</a>'; }
       } else {
         if(pill) pill.style.display = 'none';
         if(manual && status){ status.style.color = 'var(--good)'; status.textContent = '✓ Up to date (v' + (d.current || '?') + ')'; }
@@ -1079,10 +1113,11 @@
       const card = cardByHeading('Licenses');
       const tbody = card && card.querySelector('tbody');
       if(tbody){
-        tbody.innerHTML = paid.map(s=>{
+        const paidTop = paid.slice().sort((a,b)=>(b.owned||0)-(a.owned||0)).slice(0, 6);   // cap card height; full set is behind "View all"
+        tbody.innerHTML = paidTop.map(s=>{
           const free = s.free || 0;
           const cls = free > 50 ? 'bad' : (free > 10 ? 'warn' : 'good');
-          return '<tr><td>'+s.name+'</td>'+
+          return '<tr><td><span class="cell-ell" title="'+escHtml(s.name)+'">'+escHtml(s.name)+'</span></td>'+
                  '<td class="r tnum">'+(s.used||0).toLocaleString()+'</td>'+
                  '<td class="r tnum">'+(s.owned||0).toLocaleString()+'</td>'+
                  '<td class="r"><span class="tag '+cls+'">'+free+'</span></td></tr>';
@@ -1136,9 +1171,9 @@
           else {
             const top = (d.issues && d.issues[0]) || {};
             const st = (top.status||'').replace(/^Service/,'').replace(/([a-z])([A-Z])/g,'$1 $2').trim() || 'Issue';
-            const svc = top.service || 'A service';
-            const tail = n>1 ? ('+'+(n-1)+' more') : st;
-            note.innerHTML = '<span class="state bad sh-pill" title="'+svc+' · '+st+'">&#9679; '+svc+'</span>'+
+            const svc = escHtml(top.service || 'A service'), est = escHtml(st);
+            const tail = n>1 ? ('+'+(n-1)+' more') : est;
+            note.innerHTML = '<span class="state bad sh-pill" title="'+svc+' · '+est+'">&#9679; '+svc+'</span>'+
               '<span class="sh-tail">'+tail+'</span>';
           }
         }
@@ -1159,7 +1194,7 @@
     const max = Math.max(1, ...items.map(i=>i[valKey]||0));
     return items.map(i=>{
       const w = Math.round((i[valKey]||0)/max*100);
-      return '<div class="barrow"><span class="name">'+i[labelKey]+'</span>'+
+      return '<div class="barrow"><span class="name">'+escHtml(i[labelKey])+'</span>'+
              '<span class="track"><span class="fill" style="width:'+w+'%"></span></span>'+
              '<span class="val tnum">'+(i[valKey]||0).toLocaleString()+'</span></div>';
     }).join('');
@@ -1177,6 +1212,7 @@
     fetch('/api/org').then(r=>r.json()).then(d=>{
       if(!d || d.error){ if(d && d.error) console.warn('org:', d); return; }
       const nm = shortTenantName(d);
+      if(nm) activeOrgName = nm;
       if(nm && tenantsCache.activeId) orgNames[tenantsCache.activeId] = nm;
       updatePill();
       const label = document.getElementById('tswLabel');
@@ -1216,7 +1252,7 @@
           ? soon.map(i=>{
               const cls = i.days <= 7 ? 'bad' : (i.days <= 30 ? 'warn' : 'good');
               const label = i.days < 0 ? 'expired' : (i.days + ' day' + (i.days===1?'':'s'));
-              return '<tr><td>'+i.app+'</td><td>'+i.type+'</td><td class="r"><span class="tag '+cls+'">'+label+'</span></td></tr>';
+              return '<tr><td><span class="cell-ell" title="'+escHtml(i.app)+'">'+escHtml(i.app)+'</span></td><td>'+escHtml(i.type)+'</td><td class="r"><span class="tag '+cls+'">'+escHtml(label)+'</span></td></tr>';
             }).join('')
           : '<tr><td colspan="3">Nothing expiring in the next 60 days</td></tr>';
       }
@@ -1247,9 +1283,9 @@
       const stbody = scard && scard.querySelector('tbody');
       if(stbody){
         const cap = scard.querySelector('.cap'); if(cap) cap.textContent = 'Largest '+d.top.length+' of '+d.totalSites.toLocaleString()+' sites';
-        stbody.innerHTML = d.top.map(s=>'<tr><td>'+s.url+'</td><td>'+s.template+'</td>'+
-          '<td class="r tnum">'+(s.files||0).toLocaleString()+'</td><td class="r tnum">'+s.gb+' GB</td>'+
-          '<td class="r">'+(s.last||'')+'</td></tr>').join('');
+        stbody.innerHTML = d.top.map(s=>'<tr><td><span class="cell-ell" title="'+escHtml(s.url)+'">'+escHtml(s.url)+'</span></td><td>'+escHtml(s.template)+'</td>'+
+          '<td class="r tnum">'+(s.files||0).toLocaleString()+'</td><td class="r tnum">'+escHtml(s.gb)+' GB</td>'+
+          '<td class="r">'+escHtml(s.last||'')+'</td></tr>').join('');
       }
       if(scard) addCardLink(scard, 'View all '+d.totalSites+' sites', 'storage');
       // storage quota is a manual Settings value (Graph exposes no tenant quota app-only)
@@ -1337,13 +1373,12 @@
       '<div class="wd-center"><b class="tnum">'+total.toLocaleString()+'</b><span>active &middot; 30d</span></div>';
   }
   function loadWorkload(){
-    const sample = [{service:'Teams',active:1820},{service:'SharePoint',active:1588},{service:'Exchange',active:1881},{service:'OneDrive',active:1372}];
     fetch('/api/workload').then(r=>r.json()).then(d=>{
       const card = cardByHeading('Workload activity'); if(!card) return;
-      if(!d || d.error){ if(d && d.error) console.warn('workload:', d); renderWorkloadDonut(card, sample); return; }
+      if(!d || d.error){ if(d && d.error) console.warn('workload:', d); renderWorkloadDonut(card, []); return; }   // no fabricated numbers on error
       const cap = card.querySelector('.cap'); if(cap) cap.textContent = 'Active users by service, last 30 days';
       renderWorkloadDonut(card, (d.items||[]).filter(i=>(i.active||0) >= 0));
-    }).catch(()=>{ const card = cardByHeading('Workload activity'); if(card) renderWorkloadDonut(card, sample); });
+    }).catch(()=>{ const card = cardByHeading('Workload activity'); if(card) renderWorkloadDonut(card, []); });
   }
 
   function setGovRow(card, label, value, cls){
@@ -1397,13 +1432,15 @@
   function refreshAll(){
     METRICS = {};
     loadLive(); loadServiceHealth(); loadOrg(); loadUsers(); loadSecrets(); loadStorage(); loadCopilot(); loadWorkload(); loadGovernance(); loadSecureScore();
-    // once the live numbers have landed (or after a timeout), record today's snapshot
+    // record today's snapshot only once ALL key metrics have landed — a partial set would
+    // overwrite a complete row for the day and blank out those tiles' trend deltas.
     const need = ['unusedLicenses','serviceIssues','guests','secretsExpiring','storageGb','secureScorePct'];
     let waited = 0;
     const timer = setInterval(()=>{
       waited += 400;
       const have = need.filter(k => k in METRICS).length;
-      if(have >= need.length || waited >= 8000){ clearInterval(timer); postSnapshot(); }
+      if(have >= need.length){ clearInterval(timer); postSnapshot(); }
+      else if(waited >= 8000){ clearInterval(timer); renderTrends(); }   // timed out incomplete -> don't record, just show existing trends
     }, 400);
   }
 
@@ -1466,11 +1503,18 @@
     }
     window.scrollTo(0,0);
   }
-  function goToArea(area){
+  function isValidArea(a){ return a === 'overview' || a === 'settings' || !!AREAS[a]; }
+  function currentArea(){ const h = (location.hash||'').replace(/^#\/?/,'').trim(); return isValidArea(h) ? h : 'overview'; }
+  function renderArea(area){
     document.querySelectorAll('.nav-item').forEach(x=>x.classList.toggle('active', x.dataset.page===area));
     goPage(area);
   }
-  document.querySelectorAll('.nav-item').forEach(a=> a.addEventListener('click', ()=> goToArea(a.dataset.page)));
+  function goToArea(area){
+    if(currentArea() === area) renderArea(area);   // hash unchanged -> no hashchange event, so render now
+    else location.hash = area;                     // update the URL -> hashchange -> renderArea (restores on refresh)
+  }
+  window.addEventListener('hashchange', ()=> renderArea(currentArea()));
+  document.querySelectorAll('.nav-item').forEach(a=> a.addEventListener('click', (e)=>{ e.preventDefault(); goToArea(a.dataset.page); }));
   const listBack = document.getElementById('listBack');
   if(listBack) listBack.addEventListener('click', ()=> goToArea('overview'));
 
@@ -1483,7 +1527,7 @@
       cols: [
         { label:'App registration', get:i=>i.app },
         { label:'Type', get:i=>i.type },
-        { label:'Expires in', get:i=> i.days < 0 ? ('expired '+(-i.days)+'d ago') : (i.days+' days'),
+        { label:'Expires in', sortVal:i=>i.days, get:i=> i.days < 0 ? ('expired '+(-i.days)+'d ago') : (i.days+' days'),
           tag:i=> i.days<=7?'bad':(i.days<=30?'warn':'') },
         { label:'', raw:true, get:i=> i.appId
             ? '<a href="https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Credentials/appId/'+i.appId+'" target="_blank" rel="noopener">open in Entra &rarr;</a>' : '' }
@@ -1538,7 +1582,18 @@
     }
   };
   const LIST_PAGE_SIZE = 50;
-  let listState = { cfg:null, data:[], dir:1, page:1, filtered:[] };
+  const SORT_NEUTRAL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 9l4-4 4 4"/><path d="M8 15l4 4 4-4"/></svg>';
+  const SORT_ASC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14l6-6 6 6"/></svg>';
+  const SORT_DESC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10l6 6 6-6"/></svg>';
+  function headHtml(cfg, sortCol, sortAsc){
+    return '<tr>'+cfg.cols.map((c,idx)=>{
+      if(c.raw || !c.label) return '<th'+(c.num?' class="r"':'')+'>'+(c.label||'')+'</th>';
+      const active = sortCol === idx;
+      const ico = active ? (sortAsc ? SORT_ASC : SORT_DESC) : SORT_NEUTRAL;
+      return '<th data-col="'+idx+'" class="sortable'+(c.num?' r':'')+(active?' sorted':'')+'">'+c.label+'<span class="sort-ico">'+ico+'</span></th>';
+    }).join('')+'</tr>';
+  }
+  let listState = { cfg:null, data:[], sortCol:null, sortAsc:true, page:1, filtered:[] };
   function openList(area){
     const cfg = AREAS[area];
     document.getElementById('listTitle').textContent = cfg ? cfg.title : area;
@@ -1546,9 +1601,11 @@
     const head = document.getElementById('listHead'), body = document.getElementById('listBody'), pager = document.getElementById('listPager');
     if(pager) pager.innerHTML = '';
     if(!cfg){ head.innerHTML=''; body.innerHTML = '<tr><td>Coming soon</td></tr>'; return; }
-    body.innerHTML = '<tr><td>Loading…</td></tr>';
+    // render the correct columns immediately so the loading state matches the title
+    head.innerHTML = headHtml(cfg, null, true);
+    body.innerHTML = '<tr><td colspan="'+cfg.cols.length+'">Loading…</td></tr>';
     fetch(cfg.endpoint).then(r=>r.json()).then(d=>{
-      listState = { cfg, data: cfg.rows(d).slice(), dir:1, page:1, filtered:[] };
+      listState = { cfg, data: cfg.rows(d).slice(), sortCol:null, sortAsc:true, page:1, filtered:[] };
       renderList();
     }).catch(()=>{ body.innerHTML = '<tr><td>Could not load</td></tr>'; });
   }
@@ -1562,7 +1619,7 @@
   function renderList(){
     const cfg = listState.cfg; if(!cfg) return;
     const head = document.getElementById('listHead'), body = document.getElementById('listBody'), pager = document.getElementById('listPager');
-    head.innerHTML = '<tr>'+cfg.cols.map((c,idx)=>'<th data-col="'+idx+'"'+(c.num?' class="r"':'')+'>'+c.label+'</th>').join('')+'</tr>';
+    head.innerHTML = headHtml(cfg, listState.sortCol, listState.sortAsc);
     const rows = currentRows();
     listState.filtered = rows;
     const total = rows.length, ps = LIST_PAGE_SIZE, pages = Math.max(1, Math.ceil(total/ps));
@@ -1572,10 +1629,11 @@
     const pageRows = rows.slice(start, start+ps);
     body.innerHTML = pageRows.length ? pageRows.map(i=> '<tr>'+cfg.cols.map(c=>{
       const v = c.get(i);
-      if(c.raw) return '<td>'+v+'</td>';
+      if(c.raw) return '<td>'+v+'</td>';   // raw columns build their own trusted markup (e.g. the Entra link from a GUID)
       if(c.num) return '<td class="r tnum">'+Number(v).toLocaleString()+'</td>';
-      if(c.tag){ const t=c.tag(i); return '<td>'+(t?'<span class="tag '+t+'">'+v+'</span>':v)+'</td>'; }
-      return '<td>'+v+'</td>';
+      if(c.tag){ const t=c.tag(i); const ev=escHtml(v); return '<td>'+(t?'<span class="tag '+t+'">'+ev+'</span>':ev)+'</td>'; }
+      const sv = escHtml(v);
+      return '<td><span class="cell-ell" title="'+sv+'">'+sv+'</span></td>';
     }).join('')+'</tr>').join('') : '<tr><td>No items</td></tr>';
     if(pager){
       if(total <= ps){
@@ -1590,10 +1648,14 @@
         if(next) next.addEventListener('click', ()=>{ if(listState.page<pages){ listState.page++; renderList(); } });
       }
     }
-    head.querySelectorAll('th').forEach(th=> th.addEventListener('click', ()=>{
-      const c = cfg.cols[+th.dataset.col]; if(c.raw) return;
-      listState.data.sort((a,b)=>{ const av=c.get(a), bv=c.get(b); return (av>bv?1:av<bv?-1:0)*listState.dir; });
-      listState.dir *= -1; listState.page = 1; renderList();
+    head.querySelectorAll('th.sortable').forEach(th=> th.addEventListener('click', ()=>{
+      const idx = +th.dataset.col, c = cfg.cols[idx];
+      listState.sortAsc = (listState.sortCol === idx) ? !listState.sortAsc : true;  // same col toggles, new col starts ascending
+      listState.sortCol = idx;
+      const dir = listState.sortAsc ? 1 : -1;
+      const val = c.sortVal || c.get;   // columns can supply a numeric sort key (e.g. days) instead of display text
+      listState.data.sort((a,b)=>{ const av=val(a), bv=val(b); return (av>bv?1:av<bv?-1:0)*dir; });
+      listState.page = 1; renderList();
     }));
   }
   const listSearch = document.getElementById('listSearch');
@@ -1723,9 +1785,10 @@
   // ---- Multi-tenant ----------------------------------------------------------
   let tenantsCache = { activeId:null, tenants:[] };
   let orgNames = {};   // tenantId -> friendly org name from /api/org (takes priority over the profile label)
+  let activeOrgName = '';   // current active tenant's org name, id-independent so a load race can't drop it
   function escHtml(s){ return String(s==null?'':s).replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
   function activeTenant(){ return (tenantsCache.tenants||[]).find(t=>t.id===tenantsCache.activeId) || null; }
-  function pillName(){ const id = tenantsCache.activeId, a = activeTenant(); return (id && orgNames[id]) || (a && a.label) || 'No tenant'; }
+  function pillName(){ const id = tenantsCache.activeId, a = activeTenant(); return activeOrgName || (id && orgNames[id]) || (a && a.label) || 'No tenant'; }
   function updatePill(){ const l = document.getElementById('tswLabel'); if(l) l.textContent = pillName(); }
   function loadTenants(){
     return fetch('/api/tenants').then(r=>r.json()).then(d=>{
@@ -1755,6 +1818,7 @@
     if(show) m.removeAttribute('hidden'); else m.setAttribute('hidden','');
   }
   function switchTenant(id){
+    activeOrgName = '';   // drop the old tenant's name until the new one's /api/org lands
     const label = document.getElementById('tswLabel'); if(label) label.textContent = 'Switching…';
     fetch('/api/tenants/'+encodeURIComponent(id)+'/activate',{ method:'POST' })
       .then(r=>r.json()).then(()=>{ loadTenants().then(()=>{ refreshAll(); }); })
@@ -1949,10 +2013,11 @@
   initDragReorder();
   applyLayout();
 
+  renderArea(currentArea());   // restore the page from the URL hash (stays put on refresh)
   refreshAll();
 
-  // load tenants for the switcher; first run with none saved lands on Settings
-  loadTenants().then(()=>{ if(!(tenantsCache.tenants||[]).length) goToArea('settings'); });
+  // load tenants for the switcher; on a truly fresh visit with none saved, land on Settings
+  loadTenants().then(()=>{ if(!(tenantsCache.tenants||[]).length && !location.hash) goToArea('settings'); });
 </script>
 </body>
 </html>

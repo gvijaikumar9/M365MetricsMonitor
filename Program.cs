@@ -13,6 +13,21 @@ var app = builder.Build();
 
 const string url = "http://localhost:5137";
 app.Urls.Add(url);
+
+// This server is localhost-only and unauthenticated. Guard against DNS-rebinding (reject any
+// Host header that isn't loopback) and CSRF (reject cross-origin calls to /api, which could
+// otherwise silently add/delete tenants or read tenant data from a page the user is visiting).
+static bool IsLoopback(string? h) => h is "localhost" or "127.0.0.1" or "::1";
+app.Use(async (ctx, next) =>
+{
+    if (!IsLoopback(ctx.Request.Host.Host)) { ctx.Response.StatusCode = 403; return; }
+    var origin = ctx.Request.Headers.Origin.ToString();
+    if (!string.IsNullOrEmpty(origin) && ctx.Request.Path.StartsWithSegments("/api")
+        && (!Uri.TryCreate(origin, UriKind.Absolute, out var o) || !IsLoopback(o.Host)))
+    { ctx.Response.StatusCode = 403; return; }
+    await next();
+});
+
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
@@ -20,6 +35,7 @@ var tenantId = builder.Configuration["Graph:TenantId"];
 var clientId = builder.Configuration["Graph:ClientId"];
 var clientSecret = builder.Configuration["Graph:ClientSecret"];
 var appVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "0.2.0";
+var sharedHttp = new HttpClient();   // one client reused for raw HTTP (usage reports, GitHub) to avoid socket exhaustion
 
 // Free / self-service SKUs (provisioned with huge seat counts) to keep out of the
 // "unused licenses" total.
@@ -36,20 +52,6 @@ GraphServiceClient? graph = null;
 ClientSecretCredential Cred() => credential ??= new ClientSecretCredential(tenantId, clientId, clientSecret);
 GraphServiceClient G() => graph ??= new GraphServiceClient(Cred(), new[] { "https://graph.microsoft.com/.default" });
 bool Configured() => !NotConfigured(tenantId) && !NotConfigured(clientId) && !NotConfigured(clientSecret);
-
-// Save connection settings from the UI: update runtime, reset the Graph client, persist to appsettings.json.
-var appsettingsPath = Path.Combine(app.Environment.ContentRootPath, "appsettings.json");
-void SaveConfig(string t, string c, string s)
-{
-    tenantId = t; clientId = c; clientSecret = s;
-    credential = null; graph = null;
-    var json = System.Text.Json.JsonSerializer.Serialize(new
-    {
-        Graph = new { TenantId = t, ClientId = c, ClientSecret = s },
-        Logging = new { LogLevel = new Dictionary<string, string> { ["Default"] = "Warning", ["Microsoft.AspNetCore"] = "Warning" } }
-    }, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
-    File.WriteAllText(appsettingsPath, json);
-}
 
 // ---- Multi-tenant profiles (saved to tenants.json next to the app) -----------
 var tenantsPath = Path.Combine(app.Environment.ContentRootPath, "tenants.json");
@@ -100,30 +102,6 @@ void LoadSnaps()
 }
 void SaveSnaps() => File.WriteAllText(snapshotsPath, System.Text.Json.JsonSerializer.Serialize(snaps, tenantJsonOpts));
 LoadSnaps();
-
-// ---- Config + permission validation -----------------------------------------
-app.MapGet("/api/config", () => Results.Json(new
-{
-    configured = Configured(),
-    tenantId = NotConfigured(tenantId) ? "" : tenantId,
-    clientId = NotConfigured(clientId) ? "" : clientId,
-    hasSecret = !NotConfigured(clientSecret)
-}));
-
-app.MapPost("/api/config", async (ConfigDto body) =>
-{
-    // blank secret means "keep the existing one"
-    var secret = (body is null || string.IsNullOrWhiteSpace(body.clientSecret)) ? clientSecret : body.clientSecret.Trim();
-    if (body is null || string.IsNullOrWhiteSpace(body.tenantId) || string.IsNullOrWhiteSpace(body.clientId) || NotConfigured(secret))
-        return Results.Json(new { ok = false, message = "Tenant ID, Client ID and Client Secret are all required." });
-    SaveConfig(body.tenantId.Trim(), body.clientId.Trim(), secret);
-    try
-    {
-        await Cred().GetTokenAsync(new TokenRequestContext(new[] { "https://graph.microsoft.com/.default" }));
-        return Results.Json(new { ok = true, message = "Connected. Live data will load." });
-    }
-    catch (Exception ex) { return Results.Json(new { ok = false, message = Describe(ex) }); }
-});
 
 // ---- Multi-tenant: list / add-or-update / switch / delete --------------------
 app.MapGet("/api/tenants", () => Results.Json(new
@@ -245,12 +223,11 @@ app.MapGet("/api/update-check", async () =>
     const string repoUrl = "https://github.com/gvijaikumar9/M365MetricsMonitor";
     try
     {
-        using var http = new HttpClient();
         using var msg = new HttpRequestMessage(HttpMethod.Get, $"https://api.github.com/repos/{repo}/releases/latest");
         msg.Headers.UserAgent.ParseAdd($"M365MetricsMonitor/{appVersion}");
         msg.Headers.Accept.ParseAdd("application/vnd.github+json");
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(8));
-        var resp = await http.SendAsync(msg, cts.Token);
+        var resp = await sharedHttp.SendAsync(msg, cts.Token);
         if (!resp.IsSuccessStatusCode)   // no releases yet (404) or rate-limited -> "no update"
             return Results.Json(new { current = appVersion, latest = (string?)null, updateAvailable = false, url = repoUrl });
         var doc = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement>(await resp.Content.ReadAsStringAsync());
@@ -269,9 +246,21 @@ app.MapGet("/api/update-check", async () =>
 async Task<string> ReportCsv(string func, string version = "v1.0")
 {
     var token = (await Cred().GetTokenAsync(new TokenRequestContext(new[] { "https://graph.microsoft.com/.default" }))).Token;
-    using var http = new HttpClient();
-    http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-    return await http.GetStringAsync($"https://graph.microsoft.com/{version}/reports/{func}");
+    var uri = $"https://graph.microsoft.com/{version}/reports/{func}";
+    for (int attempt = 0; ; attempt++)
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Get, uri);   // per-request auth (shared client is thread-safe this way)
+        req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var resp = await sharedHttp.SendAsync(req);
+        if (resp.IsSuccessStatusCode) return await resp.Content.ReadAsStringAsync();
+        if (attempt < 2 && ((int)resp.StatusCode == 429 || (int)resp.StatusCode == 503))   // back off on throttling
+        {
+            await Task.Delay(resp.Headers.RetryAfter?.Delta ?? TimeSpan.FromSeconds(2));
+            continue;
+        }
+        resp.EnsureSuccessStatusCode();   // surface other failures to the caller's catch
+        return "";
+    }
 }
 
 // ---- Licenses (live) --------------------------------------------------------
@@ -314,8 +303,12 @@ app.MapGet("/api/servicehealth", async () =>
     {
         var resp = await G().Admin.ServiceAnnouncement.HealthOverviews.GetAsync();
         var svcs = resp?.Value ?? new();
+        // Statuses that are NOT an active problem (operational, or an incident that's already resolved).
+        var healthyStatuses = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        { "ServiceOperational", "ServiceRestored", "FalsePositive", "PostIncidentReviewPublished" };
+        bool IsHealthy(string? st) => healthyStatuses.Contains(st ?? "ServiceOperational");
         var issues = svcs
-            .Where(s => (s.Status?.ToString() ?? "") != "ServiceOperational")
+            .Where(s => !IsHealthy(s.Status?.ToString()))
             .Select(s => new { service = s.Service, status = s.Status?.ToString() })
             .ToList();
 
@@ -332,7 +325,7 @@ app.MapGet("/api/servicehealth", async () =>
 
         var all = svcs
             .Select(s => new { service = s.Service, status = s.Status?.ToString() ?? "" })
-            .OrderBy(s => s.status == "ServiceOperational" ? 1 : 0)
+            .OrderBy(s => IsHealthy(s.status) ? 1 : 0)
             .ThenBy(s => s.service)
             .ToList();
         return Results.Json(new { total = svcs.Count, healthy = issues.Count == 0, issues, messageCenter, all });
@@ -360,23 +353,30 @@ app.MapGet("/api/secrets", async () =>
     if (!Configured()) return Results.Json(new { error = "not_configured" });
     try
     {
+        var now = DateTimeOffset.UtcNow;
+        var raw = new List<(string app, string appId, string type, int days)>();
         var resp = await G().Applications.GetAsync(rc =>
         {
             rc.QueryParameters.Select = new[] { "displayName", "appId", "passwordCredentials", "keyCredentials" };
             rc.QueryParameters.Top = 999;
         });
-        var now = DateTimeOffset.UtcNow;
-        var raw = new List<(string app, string appId, string type, int days)>();
-        foreach (var a in resp?.Value ?? new())
+        int pages = 0;
+        while (resp is not null)   // follow nextLink so tenants with >999 app registrations aren't missed
         {
-            void Consider(DateTimeOffset? end, string type)
+            foreach (var a in resp.Value ?? new())
             {
-                if (end is null) return;
-                var days = (int)Math.Floor((end.Value - now).TotalDays);
-                raw.Add((a.DisplayName ?? "(unnamed app)", a.AppId ?? "", type, days));
+                void Consider(DateTimeOffset? end, string type)
+                {
+                    if (end is null) return;
+                    var days = (int)Math.Floor((end.Value - now).TotalDays);
+                    raw.Add((a.DisplayName ?? "(unnamed app)", a.AppId ?? "", type, days));
+                }
+                foreach (var p in a.PasswordCredentials ?? new()) Consider(p.EndDateTime, "Secret");
+                foreach (var k in a.KeyCredentials ?? new()) Consider(k.EndDateTime, "Certificate");
             }
-            foreach (var p in a.PasswordCredentials ?? new()) Consider(p.EndDateTime, "Secret");
-            foreach (var k in a.KeyCredentials ?? new()) Consider(k.EndDateTime, "Certificate");
+            var next = resp.OdataNextLink;
+            if (string.IsNullOrEmpty(next) || ++pages >= 200) break;
+            resp = await G().Applications.WithUrl(next).GetAsync();
         }
         var expiring30 = raw.Count(x => x.days <= 30);
         // full list, sorted soonest first (the tile slices; the "View all" page shows everything)
@@ -512,7 +512,7 @@ app.MapGet("/api/copilot", async () =>
             }
         }
         catch { /* Copilot report not available (e.g. no Copilot in tenant) */ }
-        int pct = assigned > 0 ? (int)Math.Round(active * 100.0 / assigned) : 0;
+        int pct = assigned > 0 ? Math.Min(100, (int)Math.Round(active * 100.0 / assigned)) : 0;
         return Results.Json(new { hasCopilot = owned > 0, owned, assigned, active, pct });
     }
     catch (Exception ex) { return Results.Json(new { error = "graph_error", message = Describe(ex) }); }
@@ -552,33 +552,58 @@ app.MapGet("/api/governance", async () =>
     if (!Configured()) return Results.Json(new { error = "not_configured" });
     try
     {
+        // Page every unified group for an accurate total.
+        var unifiedAll = new List<Microsoft.Graph.Models.Group>();
         var groups = await G().Groups.GetAsync(rc =>
         {
             rc.QueryParameters.Select = new[] { "id", "displayName", "groupTypes" };
             rc.QueryParameters.Top = 999;
         });
-        var unified = (groups?.Value ?? new())
-            .Where(g => g.GroupTypes != null && g.GroupTypes.Contains("Unified"))
-            .Take(300).ToList();
-
-        var checks = await Task.WhenAll(unified.Select(async g =>
+        int gp = 0;
+        while (groups is not null)
         {
-            var owners = await G().Groups[g.Id].Owners.GetAsync(rc => rc.QueryParameters.Top = 1);
-            var members = await G().Groups[g.Id].Members.GetAsync(rc => rc.QueryParameters.Top = 1);
-            return (ownerless: (owners?.Value?.Count ?? 0) == 0, empty: (members?.Value?.Count ?? 0) == 0);
+            foreach (var g in groups.Value ?? new())
+                if (g.GroupTypes != null && g.GroupTypes.Contains("Unified")) unifiedAll.Add(g);
+            var gnext = groups.OdataNextLink;
+            if (string.IsNullOrEmpty(gnext) || ++gp >= 200) break;
+            groups = await G().Groups.WithUrl(gnext).GetAsync();
+        }
+
+        // Owner/member checks are 2 calls per group; bound concurrency so a large tenant can't
+        // burst Graph into 429s, and cap the analysed set so the tile stays responsive.
+        var toCheck = unifiedAll.Take(500).ToList();
+        using var gate = new SemaphoreSlim(8);
+        var checks = await Task.WhenAll(toCheck.Select(async g =>
+        {
+            await gate.WaitAsync();
+            try
+            {
+                var owners = await G().Groups[g.Id].Owners.GetAsync(rc => rc.QueryParameters.Top = 1);
+                var members = await G().Groups[g.Id].Members.GetAsync(rc => rc.QueryParameters.Top = 1);
+                return (ownerless: (owners?.Value?.Count ?? 0) == 0, empty: (members?.Value?.Count ?? 0) == 0);
+            }
+            finally { gate.Release(); }
         }));
         int ownerless = checks.Count(c => c.ownerless);
         int empty = checks.Count(c => c.empty);
 
+        // Distinct admin role holders across all directory roles (members paged).
         var roles = await G().DirectoryRoles.GetAsync();
         var admins = new HashSet<string>();
         foreach (var role in roles?.Value ?? new())
         {
             var mem = await G().DirectoryRoles[role.Id].Members.GetAsync();
-            foreach (var m in mem?.Value ?? new()) if (m.Id != null) admins.Add(m.Id);
+            int rp = 0;
+            while (mem is not null)
+            {
+                foreach (var m in mem.Value ?? new()) if (m.Id != null) admins.Add(m.Id);
+                var mnext = mem.OdataNextLink;
+                if (string.IsNullOrEmpty(mnext) || ++rp >= 50) break;
+                mem = await G().DirectoryRoles[role.Id].Members.WithUrl(mnext).GetAsync();
+            }
         }
 
-        return Results.Json(new { groups = unified.Count, ownerless, empty, admins = admins.Count });
+        return Results.Json(new { groups = unifiedAll.Count, ownerless, empty, admins = admins.Count });
     }
     catch (Exception ex) { return Results.Json(new { error = "graph_error", message = Describe(ex) }); }
 });
@@ -713,7 +738,6 @@ static Dictionary<string, string> FriendlyNames() => new()
     ["DEVELOPERPACK"] = "Office 365 E3 Developer",
 };
 
-record ConfigDto(string tenantId, string clientId, string clientSecret);
 record TenantDto(string? id, string label, string tenantId, string clientId, string clientSecret);
 record TenantProfile(string Id, string Label, string TenantId, string ClientId, string ClientSecret);
 record TenantStore(string? ActiveId, List<TenantProfile> Tenants);
