@@ -13,6 +13,9 @@ anything, you still use the Microsoft admin center.
 
 ![The M365 Metrics Monitor dashboard: service health, licences, storage, secrets, Copilot, workload activity and Secure Score on one screen](docs/screenshots/dashboard-overview.png)
 
+A step-by-step walkthrough, with the story behind the tool, is on the blog:
+[A free local dashboard for your Microsoft 365 numbers](https://www.fivenumber.com/m365-metrics-monitor/).
+
 ## What it shows
 
 - **Service health** and the actual named advisories/incidents (by severity)
